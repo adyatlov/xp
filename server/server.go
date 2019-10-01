@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/mux"
 
 	"github.com/adyatlov/bunxp/objects"
@@ -13,47 +14,50 @@ import (
 
 type Server struct {
 	explorer *objects.Explorer
+	box      *packr.Box
 }
 
 func New(e *objects.Explorer) *Server {
-	return &Server{
-		explorer: e,
-	}
+	s := &Server{}
+	s.explorer = e
+	s.box = packr.New("client", "../client")
+	return s
 }
 
-func (e *Server) Serve() error {
+func (s *Server) Serve() error {
 	r := mux.NewRouter()
-	r.HandleFunc("/objects/cluster", e.cluster)
-	r.HandleFunc("/objects/{type}/{id}", e.object)
-	r.HandleFunc("/objectTypes", e.objectTypes)
-	r.HandleFunc("/metricTypes", e.metricTypes)
+	r.PathPrefix("/client").Handler(http.StripPrefix("/client", http.FileServer(s.box)))
+	r.HandleFunc("/api/objects/cluster", s.cluster)
+	r.HandleFunc("/api/objects/{type}/{id}", s.object)
+	r.HandleFunc("/api/objectTypes", s.objectTypes)
+	r.HandleFunc("/api/metricTypes", s.metricTypes)
 	return http.ListenAndServe(fmt.Sprintf("%v:%v", "localhost", "7777"), r)
 }
 
-func (e *Server) cluster(w http.ResponseWriter, r *http.Request) {
+func (s *Server) cluster(w http.ResponseWriter, r *http.Request) {
 	t := objects.ObjectTypeName("cluster")
-	e.objectTypeId(t, "", w, r)
+	s.objectTypeId(t, "", w, r)
 }
 
-func (e *Server) object(w http.ResponseWriter, r *http.Request) {
+func (s *Server) object(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	t := objects.ObjectTypeName(vars["type"])
 	id := objects.ObjectId(vars["id"])
-	e.objectTypeId(t, id, w, r)
+	s.objectTypeId(t, id, w, r)
 }
 
-func (e *Server) objectTypes(w http.ResponseWriter, r *http.Request) {
+func (s *Server) objectTypes(w http.ResponseWriter, r *http.Request) {
 	types := objects.ObjectTypes()
 	write(types, w)
 }
 
-func (e *Server) metricTypes(w http.ResponseWriter, r *http.Request) {
+func (s *Server) metricTypes(w http.ResponseWriter, r *http.Request) {
 	types := objects.MetricTypes()
 	write(types, w)
 }
 
-func (e *Server) objectTypeId(t objects.ObjectTypeName, id objects.ObjectId, w http.ResponseWriter, r *http.Request) {
-	object, err := e.explorer.Object(t, id)
+func (s *Server) objectTypeId(t objects.ObjectTypeName, id objects.ObjectId, w http.ResponseWriter, r *http.Request) {
+	object, err := s.explorer.Object(t, id)
 	if err != nil {
 		http.Error(w,
 			fmt.Sprintf("Error: cannot get object: %v\n", err.Error()),
@@ -71,7 +75,6 @@ func write(i interface{}, w http.ResponseWriter) {
 			http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 	if _, err := fmt.Fprint(w, string(objectBytes)); err != nil {
 		log.Printf("Error occurred when sending response: %v", err)
 	}
