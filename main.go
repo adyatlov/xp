@@ -12,18 +12,23 @@ import (
 )
 
 func main() {
-	wd, err := os.Getwd()
-	if err != nil {
-		fmt.Printf("Error: cannot detect a working directory: %v\n", err.Error())
-		os.Exit(1)
+	var path string
+	var err error
+	if len(os.Args) == 1 {
+		path, err = os.Getwd()
+		if err != nil {
+			fmt.Printf("Error: cannot detect a working directory: %v\n", err.Error())
+			os.Exit(1)
+		}
+	} else {
+		path = os.Args[1]
 	}
-	fmt.Println("Open http://localhost:7777")
-	b, err := bundle.NewBundle(wd)
+	b, err := bundle.NewBundle(path)
 	if err != nil {
 		fmt.Printf("Error: cannot create a bundle: %v\n", err.Error())
 		os.Exit(1)
 	}
-	explorer := &objects.ObjectExplorer{
+	explorer := &objects.Explorer{
 		Bundle: &b,
 	}
 	cluster, err := explorer.Object("cluster", "")

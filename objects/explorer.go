@@ -6,11 +6,11 @@ import (
 	"github.com/mesosphere/bun/v2/bundle"
 )
 
-type ObjectExplorer struct {
+type Explorer struct {
 	Bundle *bundle.Bundle
 }
 
-func (b *ObjectExplorer) Object(n ObjectTypeName, id ObjectId, metrics ...MetricName) (*Object, error) {
+func (b *Explorer) Object(n ObjectTypeName, id ObjectId, metrics ...MetricTypeName) (*Object, error) {
 	t, err := GetObjectType(n)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create object: %s", err.Error())

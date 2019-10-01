@@ -1,22 +1,47 @@
 package objects
 
-import "github.com/mesosphere/bun/v2/bundle"
+import (
+	"fmt"
 
-type MetricType string
+	"github.com/mesosphere/bun/v2/bundle"
+)
+
+type MetricValueType string
+type MetricTypeName string
 type MetricName string
 
 const (
-	MTInteger    MetricType = "integer"
-	MTReal                  = "real"
-	MTPercentage            = "percentage"
-	MTVersion               = "version"
-	MTTimestamp             = "timestamp"
+	MTInteger    MetricValueType = "integer"
+	MTReal                       = "real"
+	MTPercentage                 = "percentage"
+	MTVersion                    = "version"
+	MTTimestamp                  = "timestamp"
 )
 
 type Metric struct {
-	Type        MetricType
-	Name        MetricName
-	Description string
-	Value       interface{}
-	Evaluate    func(*bundle.Bundle, *Object) (interface{}, error) `json:"-"`
+	ObjectTypeName ObjectTypeName
+	MetricTypeName MetricTypeName
+	Value          interface{}
+}
+
+type MetricType struct {
+	Name           MetricTypeName
+	ObjectTypeName ObjectTypeName
+	ValueType      MetricValueType
+	MetricName     MetricName
+	Description    string
+	Evaluate       func(*bundle.Bundle, ObjectId) (interface{}, error)
+}
+
+func (t MetricType) New(b *bundle.Bundle, id ObjectId) (*Metric, error) {
+	m := &Metric{
+		ObjectTypeName: t.ObjectTypeName,
+		MetricTypeName: t.Name,
+	}
+	var err error
+	if m.Value, err = t.Evaluate(b, id); err != nil {
+		return nil, fmt.Errorf("cannot evaluate metric \"%v\" for object \"%v\" of type \"%v\"",
+			t.Name, id, t.ObjectTypeName)
+	}
+	return m, err
 }

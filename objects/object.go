@@ -11,38 +11,31 @@ type ObjectId string
 type ObjectName string
 
 type Object struct {
+	Name     ObjectName
 	Type     ObjectTypeName
 	Id       ObjectId
-	Name     ObjectName
 	Metrics  []*Metric
 	Children []*Object
-	Parents  []*Object
 	Errors   []string
 }
 
 type ObjectType struct {
 	Name           ObjectTypeName
 	Description    string
-	Metrics        []Metric
-	DefaultMetrics []MetricName
+	Metrics        []*MetricType
+	DefaultMetrics []MetricTypeName
 	Find           func(*bundle.Bundle, ObjectId) (*Object, error)
-	Parents        func(*bundle.Bundle, ObjectId) ([]*Object, error)
 	Children       func(*bundle.Bundle, ObjectId) ([]*Object, error)
 }
 
-func (t ObjectType) New(b *bundle.Bundle, id ObjectId, metrics ...MetricName) (*Object, error) {
+func (t ObjectType) New(b *bundle.Bundle, id ObjectId, metrics ...MetricTypeName) (*Object, error) {
 	object, err := t.Find(b, id)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create object: %s", err.Error())
 	}
 	object.Type = t.Name
-	if object.Id == "" && id != "" {
+	if object.Id == "" {
 		object.Id = id
-	}
-	if t.Parents != nil {
-		if object.Parents, err = t.Parents(b, id); err != nil {
-			object.Errors = append(object.Errors, fmt.Sprintf("cannot find parents: %s", err.Error()))
-		}
 	}
 	if t.Children != nil {
 		if object.Children, err = t.Children(b, id); err != nil {
@@ -54,23 +47,23 @@ func (t ObjectType) New(b *bundle.Bundle, id ObjectId, metrics ...MetricName) (*
 	}
 	for _, requestedMetric := range metrics {
 		ok := false
-		for _, metric := range t.Metrics {
-			if requestedMetric != metric.Name {
+		for _, metricType := range t.Metrics {
+			if requestedMetric != metricType.Name {
 				continue
 			}
-			metric.Value, err = metric.Evaluate(b, object)
+			metric, err := metricType.New(b, object.Id)
 			if err != nil {
 				object.Errors = append(object.Errors,
-					fmt.Sprintf("cannot evaluate metric %v: %s",
+					fmt.Sprintf("cannot create metric: \"%v\": %s",
 						requestedMetric, err.Error()))
 			}
-			object.Metrics = append(object.Metrics, &metric)
+			object.Metrics = append(object.Metrics, metric)
 			ok = true
 			break
 		}
 		if !ok {
 			object.Errors = append(object.Errors,
-				fmt.Sprintf("reguested metric %v doesn't exist", requestedMetric))
+				fmt.Sprintf("reguested metric \"%v\" doesn't exist", requestedMetric))
 		}
 	}
 	return object, nil
