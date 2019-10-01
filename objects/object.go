@@ -15,7 +15,7 @@ type Object struct {
 	Type     ObjectTypeName
 	Id       ObjectId
 	Metrics  []*Metric
-	Children map[ObjectTypeName][]*Object
+	Children map[ObjectTypeName][]ObjectId
 	Errors   []string
 }
 
@@ -25,13 +25,13 @@ type ObjectType struct {
 	Metrics        []*MetricType
 	DefaultMetrics []MetricTypeName
 	Find           func(*bundle.Bundle, ObjectId) (*Object, error)
-	Children       func(*bundle.Bundle, ObjectId) (map[ObjectTypeName][]*Object, error)
+	Children       func(*bundle.Bundle, ObjectId) (map[ObjectTypeName][]ObjectId, error)
 }
 
 func (t ObjectType) New(b *bundle.Bundle, id ObjectId, metrics ...MetricTypeName) (*Object, error) {
 	object, err := t.Find(b, id)
 	if err != nil {
-		return nil, fmt.Errorf("cannot create object: %s", err.Error())
+		return nil, fmt.Errorf("cannot find object: %s", err.Error())
 	}
 	object.Type = t.Name
 	if object.Id == "" {

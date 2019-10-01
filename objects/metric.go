@@ -16,6 +16,7 @@ const (
 	MTPercentage                 = "percentage"
 	MTVersion                    = "version"
 	MTTimestamp                  = "timestamp"
+	MTType                       = "type"
 )
 
 type Metric struct {

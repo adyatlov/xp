@@ -13,6 +13,7 @@ func init() {
 		Name:           "cluster",
 		Description:    "DC/OS Cluster",
 		Find:           find,
+		Children:       children,
 		DefaultMetrics: []objects.MetricTypeName{"dcos-version"},
 		Metrics: []*objects.MetricType{
 			metricVersion,
@@ -40,7 +41,21 @@ func find(b *bundle.Bundle, id objects.ObjectId) (*objects.Object, error) {
 	}
 	if object.Id == "" {
 		object.Id = "*Unknown ID*"
-		object.Name = "*Unknown MetricName*"
+		object.Name = "*Unknown Name*"
 	}
 	return object, nil
+}
+
+func children(b *bundle.Bundle, id objects.ObjectId) (map[objects.ObjectTypeName][]objects.ObjectId, error) {
+	c := make(map[objects.ObjectTypeName][]objects.ObjectId)
+	c["node"] = nodes(b)
+	return c, nil
+}
+
+func nodes(b *bundle.Bundle) []objects.ObjectId {
+	ids := make([]objects.ObjectId, 0, len(b.Hosts))
+	for ip, _ := range b.Hosts {
+		ids = append(ids, objects.ObjectId(ip))
+	}
+	return ids
 }
