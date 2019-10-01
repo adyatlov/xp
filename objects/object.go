@@ -15,7 +15,7 @@ type Object struct {
 	Type     ObjectTypeName
 	Id       ObjectId
 	Metrics  []*Metric
-	Children []*Object
+	Children map[ObjectTypeName][]*Object
 	Errors   []string
 }
 
@@ -25,7 +25,7 @@ type ObjectType struct {
 	Metrics        []*MetricType
 	DefaultMetrics []MetricTypeName
 	Find           func(*bundle.Bundle, ObjectId) (*Object, error)
-	Children       func(*bundle.Bundle, ObjectId) ([]*Object, error)
+	Children       func(*bundle.Bundle, ObjectId) (map[ObjectTypeName][]*Object, error)
 }
 
 func (t ObjectType) New(b *bundle.Bundle, id ObjectId, metrics ...MetricTypeName) (*Object, error) {
