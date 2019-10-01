@@ -1,17 +1,19 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"log"
 	"os"
+
+	"github.com/adyatlov/bunxp/server"
 
 	"github.com/adyatlov/bunxp/objects"
 
-	_ "github.com/adyatlov/bunxp/objects/cluster"
 	"github.com/mesosphere/bun/v2/bundle"
 )
 
 func main() {
+	fmt.Println("Please connect to http://localhost:7777")
 	var path string
 	var err error
 	if len(os.Args) == 1 {
@@ -28,18 +30,7 @@ func main() {
 		fmt.Printf("Error: cannot create a bundle: %v\n", err.Error())
 		os.Exit(1)
 	}
-	explorer := &objects.Explorer{
-		Bundle: &b,
-	}
-	cluster, err := explorer.Object("cluster", "")
-	if err != nil {
-		fmt.Printf("Error: cannot get cluster object: %v\n", err.Error())
-		os.Exit(1)
-	}
-	clusterPrint, err := json.Marshal(cluster)
-	if err != nil {
-		fmt.Printf("Error: cannot convert cluster object: %v\n", err.Error())
-		os.Exit(1)
-	}
-	fmt.Println(string(clusterPrint))
+	e := objects.NewExplorer(&b)
+	s := server.New(e)
+	log.Fatal(s.Serve())
 }

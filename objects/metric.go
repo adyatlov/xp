@@ -20,7 +20,6 @@ const (
 )
 
 type Metric struct {
-	ObjectTypeName ObjectTypeName
 	MetricTypeName MetricTypeName
 	Value          interface{}
 }
@@ -31,12 +30,11 @@ type MetricType struct {
 	ValueType      MetricValueType
 	MetricName     MetricName
 	Description    string
-	Evaluate       func(*bundle.Bundle, ObjectId) (interface{}, error)
+	Evaluate       func(*bundle.Bundle, ObjectId) (interface{}, error) `json:"-"`
 }
 
 func (t MetricType) New(b *bundle.Bundle, id ObjectId) (*Metric, error) {
 	m := &Metric{
-		ObjectTypeName: t.ObjectTypeName,
 		MetricTypeName: t.Name,
 	}
 	var err error

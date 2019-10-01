@@ -7,7 +7,11 @@ import (
 )
 
 type Explorer struct {
-	Bundle *bundle.Bundle
+	bundle *bundle.Bundle
+}
+
+func NewExplorer(b *bundle.Bundle) *Explorer {
+	return &Explorer{bundle: b}
 }
 
 func (b *Explorer) Object(n ObjectTypeName, id ObjectId, metrics ...MetricTypeName) (*Object, error) {
@@ -15,5 +19,5 @@ func (b *Explorer) Object(n ObjectTypeName, id ObjectId, metrics ...MetricTypeNa
 	if err != nil {
 		return nil, fmt.Errorf("cannot create object: %s", err.Error())
 	}
-	return t.New(b.Bundle, id, metrics...)
+	return t.New(b.bundle, id, metrics...)
 }

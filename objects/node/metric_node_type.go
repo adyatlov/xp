@@ -7,12 +7,13 @@ import (
 	"github.com/mesosphere/bun/v2/bundle"
 )
 
-var metricNodeType = &objects.MetricType{
-	ValueType:   objects.MTType,
-	Name:        "node-type",
-	MetricName:  "Node Type",
-	Description: "Type of the DC/OS node; can be \"master\", \"agent\" or \"public agent\"",
-	Evaluate:    metricNodeTypeEvaluate,
+var metricNodeType = objects.MetricType{
+	ValueType:      objects.MTType,
+	ObjectTypeName: "node",
+	Name:           "node-type",
+	MetricName:     "Node Type",
+	Description:    "Type of the DC/OS node; can be \"master\", \"agent\" or \"public agent\"",
+	Evaluate:       metricNodeTypeEvaluate,
 }
 
 func metricNodeTypeEvaluate(b *bundle.Bundle, id objects.ObjectId) (interface{}, error) {

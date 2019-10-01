@@ -9,12 +9,12 @@ import (
 )
 
 func init() {
-	node := &objects.ObjectType{
+	node := objects.ObjectType{
 		Name:           "node",
 		Description:    "DC/OS Node",
 		Find:           find,
 		DefaultMetrics: []objects.MetricTypeName{"node-type"},
-		Metrics: []*objects.MetricType{
+		Metrics: []objects.MetricType{
 			metricNodeType,
 		},
 	}

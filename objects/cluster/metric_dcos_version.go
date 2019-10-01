@@ -7,12 +7,13 @@ import (
 	"github.com/mesosphere/bun/v2/bundle"
 )
 
-var metricVersion = &objects.MetricType{
-	ValueType:   objects.MTVersion,
-	Name:        "dcos-version",
-	MetricName:  "DC/OS version",
-	Description: "DC/OS Version installed on the cluster",
-	Evaluate:    metricVersionEvaluate,
+var metricVersion = objects.MetricType{
+	Name:           "dcos-version",
+	ObjectTypeName: "cluster",
+	ValueType:      objects.MTVersion,
+	MetricName:     "DC/OS version",
+	Description:    "DC/OS version installed on the cluster",
+	Evaluate:       metricVersionEvaluate,
 }
 
 func metricVersionEvaluate(b *bundle.Bundle, id objects.ObjectId) (interface{}, error) {

@@ -22,10 +22,10 @@ type Object struct {
 type ObjectType struct {
 	Name           ObjectTypeName
 	Description    string
-	Metrics        []*MetricType
+	Metrics        []MetricType
 	DefaultMetrics []MetricTypeName
-	Find           func(*bundle.Bundle, ObjectId) (*Object, error)
-	Children       func(*bundle.Bundle, ObjectId) (map[ObjectTypeName][]ObjectId, error)
+	Find           func(*bundle.Bundle, ObjectId) (*Object, error)                       `json:"-"`
+	Children       func(*bundle.Bundle, ObjectId) (map[ObjectTypeName][]ObjectId, error) `json:"-"`
 }
 
 func (t ObjectType) New(b *bundle.Bundle, id ObjectId, metrics ...MetricTypeName) (*Object, error) {

@@ -9,13 +9,13 @@ import (
 )
 
 func init() {
-	cluster := &objects.ObjectType{
+	cluster := objects.ObjectType{
 		Name:           "cluster",
 		Description:    "DC/OS Cluster",
 		Find:           find,
 		Children:       children,
 		DefaultMetrics: []objects.MetricTypeName{"dcos-version"},
-		Metrics: []*objects.MetricType{
+		Metrics: []objects.MetricType{
 			metricVersion,
 		},
 	}
