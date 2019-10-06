@@ -28,10 +28,18 @@ func GetObjectType(n ObjectTypeName) (t ObjectType, err error) {
 	return
 }
 
-func ObjectTypes() map[ObjectTypeName]ObjectType {
+func MustGetObjectType(n ObjectTypeName) ObjectType {
+	t, err := GetObjectType(n)
+	if err != nil {
+		panic(fmt.Sprintf("Object type \"%v\" does not exist.", n))
+	}
+	return t
+}
+
+func GetObjectTypes() map[ObjectTypeName]ObjectType {
 	return objectTypes
 }
 
-func MetricTypes() map[MetricTypeName]MetricType {
+func GetMetricTypes() map[MetricTypeName]MetricType {
 	return metricTypes
 }

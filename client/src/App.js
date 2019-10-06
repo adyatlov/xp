@@ -41,16 +41,24 @@ class App extends React.Component {
         } else {
             return (
                 <ul>
-                    {cluster.Children.node.map(ip => (
-                        <li key={ip}>
-                            {ip}
+                    {cluster.children.map(children => (
+                        <li key={children.type}>
+                            {children.type}: {children.objects.length}
+                            <ul>
+                                {children.objects.map(obj => (
+                                    <li key={obj.id}>
+                                        {obj.name}: {obj.metrics.map(m => (
+                                        <span>{m.type}: {m.value}</span>
+                                    ))}
+                                    </li>
+                                    ))}
+                            </ul>
                         </li>
                     ))}
                 </ul>
             );
         }
     }
-
 }
 
 export default App;

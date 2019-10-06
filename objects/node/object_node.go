@@ -10,10 +10,12 @@ import (
 
 func init() {
 	node := objects.ObjectType{
-		Name:           "node",
-		Description:    "DC/OS Node",
-		Find:           find,
-		DefaultMetrics: []objects.MetricTypeName{"node-type"},
+		Name:              "node",
+		DisplayName:       "Node",
+		PluralDisplayName: "Nodes",
+		Description:       "DC/OS Node",
+		Find:              find,
+		DefaultMetrics:    []objects.MetricTypeName{"node-type"},
 		Metrics: []objects.MetricType{
 			metricNodeType,
 		},
@@ -21,7 +23,7 @@ func init() {
 	objects.RegisterObjectType(node)
 }
 
-func find(b *bundle.Bundle, id objects.ObjectId) (*objects.Object, error) {
+func find(b *bundle.Bundle, id objects.ObjectId, withChildren bool) (*objects.Object, error) {
 	_, ok := b.Hosts[string(id)]
 	if !ok {
 		return nil, fmt.Errorf("cannot find a node with id \"%v\" in the bundle", id)

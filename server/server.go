@@ -54,12 +54,12 @@ func (s *Server) object(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) objectTypes(w http.ResponseWriter, r *http.Request) {
-	types := objects.ObjectTypes()
+	types := objects.GetObjectTypes()
 	write(types, w)
 }
 
 func (s *Server) metricTypes(w http.ResponseWriter, r *http.Request) {
-	types := objects.MetricTypes()
+	types := objects.GetMetricTypes()
 	write(types, w)
 }
 

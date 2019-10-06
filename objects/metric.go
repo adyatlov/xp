@@ -20,16 +20,16 @@ const (
 )
 
 type Metric struct {
-	Type  MetricTypeName
-	Value interface{}
+	Type  MetricTypeName `json:"type"`
+	Value interface{}    `json:"value"`
 }
 
 type MetricType struct {
-	Name           MetricTypeName
-	ObjectTypeName ObjectTypeName
-	ValueType      MetricValueType
-	MetricName     MetricName
-	Description    string
+	Name           MetricTypeName                                      `json:"name"`
+	ObjectTypeName ObjectTypeName                                      `json:"objectTypeName"`
+	ValueType      MetricValueType                                     `json:"valueType"`
+	MetricName     MetricName                                          `json:"metricName"`
+	Description    string                                              `json:"description"`
 	Evaluate       func(*bundle.Bundle, ObjectId) (interface{}, error) `json:"-"`
 }
 

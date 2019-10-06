@@ -19,5 +19,5 @@ func (b *Explorer) Object(n ObjectTypeName, id ObjectId, metrics ...MetricTypeNa
 	if err != nil {
 		return nil, fmt.Errorf("cannot create object: %s", err.Error())
 	}
-	return t.New(b.bundle, id, metrics...)
+	return t.New(b.bundle, id, true, metrics...)
 }
