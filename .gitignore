@@ -1,2 +1,4 @@
 .idea
 bunxp
+packrd/
+*-packr.go
