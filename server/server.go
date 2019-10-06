@@ -20,7 +20,7 @@ type Server struct {
 func New(e *objects.Explorer) *Server {
 	s := &Server{}
 	s.explorer = e
-	s.box = packr.New("client", "../client")
+	s.box = packr.New("client", "../client/build")
 	return s
 }
 
@@ -31,7 +31,12 @@ func (s *Server) Serve() error {
 	r.HandleFunc("/api/objects/{type}/{id}", s.object)
 	r.HandleFunc("/api/objectTypes", s.objectTypes)
 	r.HandleFunc("/api/metricTypes", s.metricTypes)
+	r.HandleFunc("/", s.redirectToClient)
 	return http.ListenAndServe(fmt.Sprintf("%v:%v", "localhost", "7777"), r)
+}
+
+func (s *Server) redirectToClient(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/client", http.StatusTemporaryRedirect)
 }
 
 func (s *Server) cluster(w http.ResponseWriter, r *http.Request) {

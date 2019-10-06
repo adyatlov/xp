@@ -1,0 +1,6 @@
+Developing Client
+=================
+
+```
+cd client
+```
