@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/adyatlov/bunxp/objects"
+	"github.com/rs/cors"
 )
 
 type Server struct {
@@ -32,7 +33,8 @@ func (s *Server) Serve() error {
 	r.HandleFunc("/api/objectTypes", s.objectTypes)
 	r.HandleFunc("/api/metricTypes", s.metricTypes)
 	r.HandleFunc("/", s.redirectToClient)
-	return http.ListenAndServe(fmt.Sprintf("%v:%v", "localhost", "7777"), r)
+	corsHandler := cors.Default().Handler(r)
+	return http.ListenAndServe(fmt.Sprintf("%v:%v", "localhost", "7777"), corsHandler)
 }
 
 func (s *Server) redirectToClient(w http.ResponseWriter, r *http.Request) {

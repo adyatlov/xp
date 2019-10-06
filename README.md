@@ -1,26 +1,62 @@
 Bun Explorer
 ============
 
-Developing Client
------------------
+Developing
+----------
 
-```
-$ cd client
-$ npm install 
-$ npm start
-```
+1. Start client:
 
-Open `http://localhost:3000`
+    ```bash
+    $ cd client
+    $ npm install # only first time
+    $ npm start
+    ```
 
-Building Client
----------------
+    You don't need to relaunch the `npm start` command after you changed client files,
+    thy will be reloaded autimatically.
 
-```
-$ cd client
-$ npm run build 
-```
+2. Start server:
 
+    ```bash
+    $ go run .
+    ```
 
+3. Open `http://localhost:3000`
+
+Build project
+-------------
+
+1. Install [Packr v2](https://github.com/gobuffalo/packr/tree/master/v2):
+
+    ```bash
+    $ go get -u github.com/gobuffalo/packr/v2/packr2
+    ```
+
+3. Build client:
+
+    ```bash
+    $ cd client
+    $ npm run build 
+    ```
+
+4. Add client files to server binaries:
+
+    ```bash
+    packr2 
+    ```
+   
+5. Build client-server bundle:
+
+    ```bash
+   go build
+    ```
+   
+6. Clean-up:
+
+    ```bash
+    packr2 clean
+    ```
+   
 Object Types
 ------------
 
