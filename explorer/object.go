@@ -1,4 +1,4 @@
-package objects
+package explorer
 
 import (
 	"fmt"
@@ -16,11 +16,11 @@ type Object struct {
 	Id       ObjectId       `json:"id"`
 	Name     ObjectName     `json:"name"`
 	Metrics  []*Metric      `json:"metrics"`
-	Children []Children     `json:"children,omitempty"`
+	Children []ObjectGroup  `json:"children,omitempty"`
 	Errors   []string       `json:"errors,omitempty"`
 }
 
-type Children struct {
+type ObjectGroup struct {
 	Type    ObjectTypeName `json:"type"`
 	Objects []*Object      `json:"objects"`
 }
@@ -30,7 +30,7 @@ type ObjectType struct {
 	DisplayName       string                                                `json:"displayName"`
 	PluralDisplayName string                                                `json:"pluralDisplayName"`
 	Description       string                                                `json:"description"`
-	Metrics           []MetricType                                          `json:"metrics"`
+	Metrics           []MetricTypeName                                      `json:"metrics"`
 	DefaultMetrics    []MetricTypeName                                      `json:"defaultMetrics"`
 	Find              func(*bundle.Bundle, ObjectId, bool) (*Object, error) `json:"-"`
 }
@@ -50,10 +50,11 @@ func (t ObjectType) New(b *bundle.Bundle, id ObjectId, withChildren bool, metric
 	}
 	for _, requestedMetric := range metrics {
 		ok := false
-		for _, metricType := range t.Metrics {
-			if requestedMetric != metricType.Name {
+		for _, registeredMetric := range t.Metrics {
+			if requestedMetric != registeredMetric {
 				continue
 			}
+			metricType := MustGetMetricType(requestedMetric)
 			metric, err := metricType.New(b, object.Id)
 			if err != nil {
 				object.Errors = append(object.Errors,
@@ -69,11 +70,10 @@ func (t ObjectType) New(b *bundle.Bundle, id ObjectId, withChildren bool, metric
 				fmt.Sprintf("reguested metric \"%v\" doesn't exist", requestedMetric))
 		}
 	}
-	sortMetrics(object.Metrics)
 	return object, nil
 }
 
-func sortChildren(children []Children) {
+func sortChildren(children []ObjectGroup) {
 	types := GetObjectTypes()
 	sort.Slice(children, func(i, j int) bool {
 		return types[children[i].Type].PluralDisplayName < types[children[j].Type].PluralDisplayName
@@ -83,11 +83,4 @@ func sortChildren(children []Children) {
 			return c.Objects[i].Name < c.Objects[j].Name
 		})
 	}
-}
-
-func sortMetrics(metrics []*Metric) {
-	metricTypes := GetMetricTypes()
-	sort.Slice(metrics, func(i, j int) bool {
-		return metricTypes[metrics[i].Type].Name < metricTypes[metrics[j].Type].Name
-	})
 }

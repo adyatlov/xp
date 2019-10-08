@@ -61,7 +61,7 @@ Object Types
 ------------
 
 - Cluster
-- Node
+- Agent
 - Framework
 - Task
 - Marathon App
@@ -70,6 +70,7 @@ Object Types
 - Command Output
 - Log
 - File
+- Role
 
 Metric Types
 ------------
@@ -79,4 +80,5 @@ Metric Types
 - Percentage
 - Version
 - Timestamp
+- IP Address
 

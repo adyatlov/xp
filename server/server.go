@@ -6,19 +6,20 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/adyatlov/bunxp/explorer"
+
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/mux"
 
-	"github.com/adyatlov/bunxp/objects"
 	"github.com/rs/cors"
 )
 
 type Server struct {
-	explorer *objects.Explorer
+	explorer *explorer.Explorer
 	box      *packr.Box
 }
 
-func New(e *objects.Explorer) *Server {
+func New(e *explorer.Explorer) *Server {
 	s := &Server{}
 	s.explorer = e
 	s.box = packr.New("client", "../client/build")
@@ -42,28 +43,28 @@ func (s *Server) redirectToClient(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) cluster(w http.ResponseWriter, r *http.Request) {
-	t := objects.ObjectTypeName("cluster")
+	t := explorer.ObjectTypeName("cluster")
 	s.objectTypeId(t, "", w, r)
 }
 
 func (s *Server) object(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	t := objects.ObjectTypeName(vars["type"])
-	id := objects.ObjectId(vars["id"])
+	t := explorer.ObjectTypeName(vars["type"])
+	id := explorer.ObjectId(vars["id"])
 	s.objectTypeId(t, id, w, r)
 }
 
 func (s *Server) objectTypes(w http.ResponseWriter, r *http.Request) {
-	types := objects.GetObjectTypes()
+	types := explorer.GetObjectTypes()
 	write(types, w)
 }
 
 func (s *Server) metricTypes(w http.ResponseWriter, r *http.Request) {
-	types := objects.GetMetricTypes()
+	types := explorer.GetMetricTypes()
 	write(types, w)
 }
 
-func (s *Server) objectTypeId(t objects.ObjectTypeName, id objects.ObjectId, w http.ResponseWriter, r *http.Request) {
+func (s *Server) objectTypeId(t explorer.ObjectTypeName, id explorer.ObjectId, w http.ResponseWriter, r *http.Request) {
 	object, err := s.explorer.Object(t, id)
 	if err != nil {
 		http.Error(w,

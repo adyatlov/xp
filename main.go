@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/adyatlov/bunxp/server"
+	"github.com/adyatlov/bunxp/explorer"
 
-	"github.com/adyatlov/bunxp/objects"
+	"github.com/adyatlov/bunxp/server"
 
 	"github.com/mesosphere/bun/v2/bundle"
 )
@@ -30,7 +30,7 @@ func main() {
 		fmt.Printf("Error: cannot create a bundle: %v\n", err.Error())
 		os.Exit(1)
 	}
-	e := objects.NewExplorer(&b)
+	e := explorer.NewExplorer(&b)
 	s := server.New(e)
 	log.Fatal(s.Serve())
 }

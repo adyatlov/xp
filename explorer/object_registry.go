@@ -1,23 +1,27 @@
-package objects
+package explorer
 
 import (
 	"fmt"
 )
 
 var objectTypes = make(map[ObjectTypeName]ObjectType)
-var metricTypes = make(map[MetricTypeName]MetricType)
 
 func RegisterObjectType(t ObjectType) {
+	for _, dm := range t.DefaultMetrics {
+		ok := false
+		for _, m := range t.Metrics {
+			if dm == m {
+				ok = true
+			}
+		}
+		if !ok {
+			panic(fmt.Sprintf("Default metrics %v is not listed amongst all metrics", dm))
+		}
+	}
 	if _, ok := objectTypes[t.Name]; ok {
 		panic(fmt.Sprintf("object type %v already registered", t.Name))
 	}
 	objectTypes[t.Name] = t
-	for _, metricType := range t.Metrics {
-		if _, ok := metricTypes[metricType.Name]; ok {
-			panic(fmt.Sprintf("metric type %v already registered", metricType.Name))
-		}
-		metricTypes[metricType.Name] = metricType
-	}
 }
 
 func GetObjectType(n ObjectTypeName) (t ObjectType, err error) {
@@ -38,8 +42,4 @@ func MustGetObjectType(n ObjectTypeName) ObjectType {
 
 func GetObjectTypes() map[ObjectTypeName]ObjectType {
 	return objectTypes
-}
-
-func GetMetricTypes() map[MetricTypeName]MetricType {
-	return metricTypes
 }

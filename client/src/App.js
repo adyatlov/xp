@@ -1,4 +1,6 @@
 import React from 'react';
+import ClusterBar from "./ClusterBar";
+import ObjectView from "./ObjectView";
 
 class App extends React.Component {
     constructor(props) {
@@ -20,9 +22,6 @@ class App extends React.Component {
                         cluster: result
                     });
                 },
-                // Note: it's important to handle errors here
-                // instead of a catch() block so that we don't swallow
-                // exceptions from actual bugs in components.
                 (error) => {
                     this.setState({
                         isLoaded: true,
@@ -38,26 +37,13 @@ class App extends React.Component {
             return <div>Error: {error.message}</div>;
         } else if (!isLoaded) {
             return <div>Loading...</div>;
-        } else {
-            return (
-                <ul>
-                    {cluster.children.map(children => (
-                        <li key={children.type}>
-                            {children.type}: {children.objects.length}
-                            <ul>
-                                {children.objects.map(obj => (
-                                    <li key={obj.id}>
-                                        {obj.name}: {obj.metrics.map(m => (
-                                        <span>{m.type}: {m.value}</span>
-                                    ))}
-                                    </li>
-                                    ))}
-                            </ul>
-                        </li>
-                    ))}
-                </ul>
-            );
         }
+        return (
+            <>
+                <ClusterBar clusterName={cluster.name}/>
+                <ObjectView object={cluster}/>
+            </>
+        )
     }
 }
 

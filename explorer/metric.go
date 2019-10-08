@@ -1,4 +1,4 @@
-package objects
+package explorer
 
 import (
 	"fmt"
