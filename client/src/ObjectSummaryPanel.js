@@ -1,7 +1,6 @@
 import React from 'react';
-import * as PropTypes from "prop-types";
 
-class SummaryPanel extends React.Component {
+class ObjectSummaryPanel extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -16,14 +15,14 @@ class SummaryPanel extends React.Component {
         return (
             <div className="card">
                 <div className="card-header list-group-item-action text-white bg-info">{object.name}</div>
-                <MetricMap metrics={object.metrics}/>
+                <MetricList metrics={object.metrics}/>
                 <ObjectGroupList objectGroups={object.children} selectedChildrenGroupType={selectedChildrenGroupType}/>
             </div>
         )
     }
 }
 
-function MetricMap(props) {
+function MetricList(props) {
     const metrics = props.metrics
     return (
         <div className="card-body">
@@ -36,12 +35,6 @@ function MetricMap(props) {
     );
 }
 
-ChildrenGroupItem.propTypes = {
-    className: PropTypes.string,
-    group: PropTypes.any,
-    className1: PropTypes.string
-};
-
 class ObjectGroupList extends React.Component {
     constructor(props) {
         super(props);
@@ -50,6 +43,7 @@ class ObjectGroupList extends React.Component {
             selectedChildrenGroupType: props.selectedChildrenGroupType
         };
     }
+
     render() {
         const objectGroups = this.state.objectGroups;
         const selectedChildrenGroupType = this.state.selectedChildrenGroupType;
@@ -61,7 +55,7 @@ class ObjectGroupList extends React.Component {
                                        group={group}/>
                 ))}
             </ul>
-        )
+        );
     }
 }
 
@@ -75,8 +69,8 @@ function ChildrenGroupItem(props) {
     return (
         <li className={tcl} href="#">{props.group.type}
             <span className={ccl}>{props.group.objects.length}</span>
-        </li>)
-        ;
+        </li>
+    );
 }
 
-export default SummaryPanel
+export default ObjectSummaryPanel

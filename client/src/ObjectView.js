@@ -1,5 +1,5 @@
 import React from 'react'
-import SummaryPanel from "./SummaryPanel";
+import ObjectSummaryPanel from "./ObjectSummaryPanel";
 import ObjectTable from "./ObjectTable";
 
 class ObjectView extends React.Component {
@@ -24,7 +24,7 @@ class ObjectView extends React.Component {
         return (
             <div className="row">
                 <div className="col-2">
-                    <SummaryPanel object={object} selectedChildrenGroupType={selectedChildrenGroupType}/>
+                    <ObjectSummaryPanel object={object} selectedChildrenGroupType={selectedChildrenGroupType}/>
                 </div>
                 <div className="col-10">
                     {children !== null &&
