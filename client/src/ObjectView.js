@@ -6,29 +6,29 @@ class ObjectView extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            object: props.object,
-            selectedChildrenGroupType: "",
+            selectedChildrenGroupType: null
         };
-        if (typeof this.state.object.children !== "undefined" && this.state.object.children.length !== 0) {
-            this.state.selectedChildrenGroupType =  this.state.object.children[0].type
+        const o = props.object;
+        if (typeof o.children !== "undefined" && o.children.length !== 0) {
+            this.state.selectedChildrenGroupType = o.children[0].type
         }
     }
 
     render() {
-        const object = this.state.object;
-        const selectedChildrenGroupType = this.state.selectedChildrenGroupType;
+        const o = this.props.object;
+        const t = this.state.selectedChildrenGroupType;
         let children = null;
-        if (selectedChildrenGroupType !== "") {
-            children = childrenByType(object, selectedChildrenGroupType);
+        if (t !== null) {
+            children = childrenByType(o, t);
         }
         return (
             <div className="row">
-                <div className="col-2">
-                    <ObjectSummaryPanel object={object} selectedChildrenGroupType={selectedChildrenGroupType}/>
+                <div className="col-3">
+                    <ObjectSummaryPanel object={o} selectedChildrenGroupType={t}/>
                 </div>
-                <div className="col-10">
+                <div className="col-9">
                     {children !== null &&
-                    <ObjectTable objects={children}/>
+                    <ObjectTable objects={children} handleSelectObject={this.props.handleSelectObject}/>
                     }
                 </div>
             </div>
@@ -37,12 +37,15 @@ class ObjectView extends React.Component {
 }
 
 function childrenByType(object, type) {
+    if (typeof object.children === "undefined") {
+        return null;
+    }
     for (let i = 0; i < object.children.length; i++) {
         if (object.children[i].type === type) {
             return object.children[i].objects
         }
     }
-    return [];
+    return null;
 }
 
 export default ObjectView;
