@@ -3,7 +3,6 @@ import ObjectTypeName, {ObjectTypePlural} from "./ObjectType";
 import MetricTypeName from "./MetricType";
 
 function ObjectSummaryPanel(props) {
-    console.log("render ObjectSummaryPanel")
     const o = props.object;
     const t = props.selectedChildrenGroupType;
     const hasChildren = typeof o.children !== "undefined" && o.children.length !== 0;

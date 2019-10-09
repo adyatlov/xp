@@ -1,4 +1,4 @@
-package agent
+package dcosagent
 
 import (
 	"fmt"
@@ -11,12 +11,12 @@ import (
 func init() {
 	t := explorer.ObjectType{
 		Name:              "agent",
-		DisplayName:       "Agent",
-		PluralDisplayName: "Agents",
-		Description:       "DC/OS Agent",
+		DisplayName:       "DC/OS Agent",
+		PluralDisplayName: "DC/OS Agents",
+		Description:       "DC/OS Agent is a DC/OS worker node",
 		Find:              find,
-		Metrics:           []explorer.MetricTypeName{"agent-type"},
-		DefaultMetrics:    []explorer.MetricTypeName{"agent-type"},
+		Metrics:           []explorer.MetricTypeName{"dcos-agent-type"},
+		DefaultMetrics:    []explorer.MetricTypeName{"dcos-agent-type"},
 	}
 	explorer.RegisterObjectType(t)
 }

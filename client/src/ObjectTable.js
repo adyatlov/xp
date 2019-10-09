@@ -5,7 +5,6 @@ import ObjectLink from "./ObjectLink";
 
 function ObjectTable(props) {
     const objects = props.objects;
-    const handleSelectObject = props.handleSelectObject;
     const o = objects[0];
     return (
         <table className="table table-bordered">
@@ -24,8 +23,8 @@ function ObjectTable(props) {
             <tbody>
             {objects.map(obj => (
                 <tr key={obj.id}>
-                    <td onClick={handleSelectObject}>
-                        <ObjectLink object={obj}/>
+                    <td>
+                        <ObjectLink handleSelectObject={props.handleSelectObject} object={obj}/>
                     </td>
                     {obj.metrics.map(m => (
                         <td key={m.type}>{m.value}</td>

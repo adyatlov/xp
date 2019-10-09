@@ -1,4 +1,4 @@
-package agenttype
+package dcosagenttype
 
 import (
 	"fmt"
@@ -11,9 +11,9 @@ import (
 func init() {
 	t := explorer.MetricType{
 		ValueType:   explorer.MTType,
-		Name:        "agent-type",
-		MetricName:  "Agent Type",
-		Description: "Type of the DC/OS node; can be \"agent\" or \"public agent\"",
+		Name:        "dcos-agent-type",
+		MetricName:  "DC/OS Agent Type",
+		Description: "Type of the DC/OS agent; can be \"agent\" or \"public agent\"",
 		Evaluate:    e,
 	}
 	explorer.RegisterMetricType(t)

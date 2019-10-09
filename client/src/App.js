@@ -39,7 +39,6 @@ class App extends React.Component {
             .then(
                 (result) => {
                     this.setState({object: result});
-                    console.log(this.state);
                 },
                 (error) => {
                     console.error(error);
@@ -91,7 +90,6 @@ class App extends React.Component {
     }
 
     render() {
-        console.log("render App");
         const isLoaded = this.state.isLoaded;
         const cluster = this.state.cluster;
         const object = this.state.object;
