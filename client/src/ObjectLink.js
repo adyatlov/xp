@@ -1,9 +1,11 @@
 import React from "react"
+import {Link} from "react-router-dom";
 
 function ObjectLink(props) {
     let o = props.object;
+    // onClick={props.handleSelectObject}
     return (
-        <a onClick={props.handleSelectObject} data-otype={o.type} data-oid={o.id} href="/">{o.name}</a>
+        <Link to={`/o/${o.type}/${o.id}`} href="/">{o.name}</Link>
     );
 }
 

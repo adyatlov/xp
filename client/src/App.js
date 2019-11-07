@@ -15,97 +15,134 @@ class App extends React.Component {
         super(props);
         this.handleSelectObject = this.handleSelectObject.bind(this);
         this.state = {
-            isLoaded: false,
             cluster: null,
             object: null,
             error: null
         }
     }
 
-    setStateAndCheck(s) {
-        if (s !== null) {
-            this.setState(s);
-        }
-        if (this.state.cluster !== null && registry.objectTypes !== null && registry.metricTypes !== null) {
-            this.setState({isLoaded: true})
-        }
+    componentDidMount() {
+        console.log("componentDidMount");
+        this.update();
     }
 
+    componentDidUpdate() {
+        console.log("componentDidUpdate");
+        this.update();
+    }
+
+    // TODO: delete
     handleSelectObject(e) {
-        let t = e.target.dataset.otype;
-        let id = e.target.dataset.oid;
-        fetch(endpointObjects + "/" + t + "/" + id)
+        this.update();
+        e.preventDefault();
+    }
+
+    update() {
+        this.updateRegistry();
+        this.updateCluster();
+        this.updateObject();
+    }
+
+    updateCluster() {
+        if (this.state.cluster !== null) {
+            return;
+        }
+        fetch(endpointCluster)
             .then(res => res.json())
             .then(
                 (result) => {
-                    this.setState({object: result});
+                    this.setState({cluster: result});
+                    console.log("Cluster updated")
                 },
                 (error) => {
                     console.error(error);
                 }
             );
-        e.preventDefault();
     }
 
-    componentDidMount() {
-        fetch(endpointCluster)
+    updateObject() {
+        const match = this.props.match;
+        let endpoint = endpointCluster;
+        if (match.path === "/") {
+            const object = this.state.object;
+            if (object && object.type === "cluster") {
+                return;
+            }
+            endpoint = endpointCluster;
+        } else if (match.path === "/o/:type/:id") {
+            const object = this.state.object;
+            const t = match.params.type;
+            const id = match.params.id;
+            if (object && object.type === t && object.id === id) {
+                return;
+            }
+            endpoint = endpointObjects + "/" + t + "/" + id;
+        } else {
+            return;
+        }
+        fetch(endpoint)
             .then(res => res.json())
             .then(
                 (result) => {
-                    this.setStateAndCheck({cluster: result, object: result});
+                    this.setState({object: result});
+                    console.log("Object updated");
                 },
                 (error) => {
-                    this.setState({
-                        isLoaded: true,
-                        error: error
-                    });
+                    console.error(error);
                 }
             );
-        fetch(endpointObjectTypes)
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    registry.objectTypes = result;
-                    this.setStateAndCheck(null);
-                },
-                (error) => {
-                    this.setState({
-                        error: error
-                    });
-                }
-            );
-        fetch(endpointMetricTypes)
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    registry.metricTypes = result;
-                    this.setStateAndCheck(null);
-                },
-                (error) => {
-                    this.setState({
-                        error: error
-                    });
-                }
-            );
+    }
+
+    updateRegistry() {
+        if (!registry.objectTypes) {
+            fetch(endpointObjectTypes)
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        registry.objectTypes = result;
+                        this.setState({})
+                    },
+                    (error) => {
+                        this.setState({
+                            error: error
+                        });
+                    }
+                );
+        }
+        if (!registry.metricTypes) {
+            fetch(endpointMetricTypes)
+                .then(res => res.json())
+                .then(
+                    (result) => {
+                        registry.metricTypes = result;
+                        this.setState({});
+                    },
+                    (error) => {
+                        this.setState({
+                            error: error
+                        });
+                    }
+                );
+        }
     }
 
     render() {
-        const isLoaded = this.state.isLoaded;
+        console.log("RENDER", this.state);
         const cluster = this.state.cluster;
         const object = this.state.object;
         const error = this.state.error;
         if (error) {
             return <div>Error: {error.message}</div>;
-        } else if (!isLoaded) {
-            return <div>Loading...</div>;
+        } else if (registry.objectTypes && registry.metricTypes && this.state.cluster && this.state.object) {
+            return (
+                <>
+                    <ClusterBar clusterName={cluster.name}/>
+                    <ObjectView object={object} handleSelectObject={this.handleSelectObject}/>
+                </>);
         }
-        return (
-            <>
-                <ClusterBar clusterName={cluster.name}/>
-                <ObjectView object={object} handleSelectObject={this.handleSelectObject}/>
-            </>
-        )
+        return <div>Loading...</div>;
     }
+
 }
 
 export default App;

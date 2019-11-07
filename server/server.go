@@ -7,16 +7,16 @@ import (
 	"net/http"
 
 	"github.com/adyatlov/bunxp/explorer"
-
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/mux"
-
+	"github.com/graph-gophers/graphql-go"
+	"github.com/graph-gophers/graphql-go/relay"
 	"github.com/rs/cors"
 )
 
 type Server struct {
-	explorer *explorer.Explorer
 	box      *packr.Box
+	explorer *explorer.Explorer
 }
 
 func New(e *explorer.Explorer) *Server {
@@ -27,12 +27,11 @@ func New(e *explorer.Explorer) *Server {
 }
 
 func (s *Server) Serve() error {
+	schema := graphql.MustParseSchema(schemaString,
+		&resolver{explorer: s.explorer})
 	r := mux.NewRouter()
 	r.PathPrefix("/client").Handler(http.StripPrefix("/client", http.FileServer(s.box)))
-	r.HandleFunc("/api/objects/cluster", s.cluster)
-	r.HandleFunc("/api/objects/{type}/{id}", s.object)
-	r.HandleFunc("/api/objectTypes", s.objectTypes)
-	r.HandleFunc("/api/metricTypes", s.metricTypes)
+	r.Handle("/query", &relay.Handler{Schema: schema})
 	r.HandleFunc("/", s.redirectToClient)
 	corsHandler := cors.Default().Handler(r)
 	return http.ListenAndServe(fmt.Sprintf("%v:%v", "localhost", "7777"), corsHandler)

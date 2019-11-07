@@ -6,6 +6,7 @@
   "dependencies": {
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
+    "react-relay": "^6.0.0",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.2.0"
   },
@@ -13,7 +14,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+	"relay": "relay-compiler --src ./src --schema ./schema.graphql --extensions js jsx"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -29,5 +31,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "babel-plugin-relay": "^7.0.0",
+    "graphql": "^14.5.8",
+    "relay-compiler": "^7.0.0",
+    "relay-config": "^7.0.0"
   }
 }
