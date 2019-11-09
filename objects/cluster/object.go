@@ -2,37 +2,30 @@ package cluster
 
 import (
 	"fmt"
+	"log"
 
-	"github.com/adyatlov/bunxp/explorer"
+	"github.com/adyatlov/bunxp/xp"
 
 	"github.com/mesosphere/bun/v2/bundle"
 )
 
 func init() {
-	t := explorer.ObjectType{
+	t := xp.ObjectType{
 		Name:              "cluster",
 		DisplayName:       "Cluster",
 		PluralDisplayName: "Clusters",
 		Description:       "DC/OS Cluster",
-		Find:              find,
-		DefaultMetrics:    []explorer.MetricTypeName{"dcos-version"},
-		Metrics:           []explorer.MetricTypeName{"dcos-version"},
+		Metrics:           []xp.MetricTypeName{"dcos-version"},
+		DefaultMetrics:    []xp.MetricTypeName{"dcos-version"},
+		FindObject:        findObject,
+		GetChildren:       getChildren,
 	}
-	explorer.RegisterObjectType(t)
+	xp.RegisterObjectType(t)
 }
 
-func find(b *bundle.Bundle, id explorer.ObjectId, withChildren bool) (*explorer.Object, error) {
-	object := &explorer.Object{}
-	setNameAndId(b, object)
-	if withChildren {
-		findAgent(b, object)
-	}
-	return object, nil
-}
-
-func setNameAndId(b *bundle.Bundle, object *explorer.Object) {
+func findObject(b *bundle.Bundle, id xp.ObjectId) (xp.ObjectName, error) {
 	if len(b.Hosts) == 0 {
-		return
+		return "", fmt.Errorf("cannot find any hosts")
 	}
 	var host bundle.Host
 	for _, host = range b.Hosts {
@@ -42,31 +35,37 @@ func setNameAndId(b *bundle.Bundle, object *explorer.Object) {
 		ClusterName string `json:"cluster_name"`
 	}{}
 	if err := host.ReadJSON("expanded-config", config); err != nil {
-		object.Errors = append(object.Errors,
-			fmt.Sprintf("cannot parse cluster name: %s", err.Error()))
+		return "", fmt.Errorf("cannot parse cluster name: %s",
+			err.Error())
 	}
-	object.Id = explorer.ObjectId(config.ClusterName)
-	object.Name = explorer.ObjectName(config.ClusterName)
-	if object.Id == "" {
-		object.Id = "*Unknown ID*"
-		object.Name = "*Unknown Name*"
-	}
+	return xp.ObjectName(config.ClusterName), nil
 }
 
-func findAgent(b *bundle.Bundle, o *explorer.Object) {
-	t := explorer.MustGetObjectType("agent")
-	nodes := explorer.ObjectGroup{
+func getChildren(b *bundle.Bundle, id xp.ObjectId) ([]xp.ObjectGroup, error) {
+	groups := make([]xp.ObjectGroup, 0, 1)
+	group, err := findAgents(b)
+	if err != nil {
+		return groups, err
+	}
+	groups = append(groups, group)
+	return groups, nil
+}
+
+func findAgents(b *bundle.Bundle) (xp.ObjectGroup, error) {
+	t := xp.MustGetObjectType("agent")
+	group := xp.ObjectGroup{
 		Type:    t.Name,
-		Objects: make([]*explorer.Object, 0, len(b.Hosts)),
+		Objects: make([]xp.Object, 0, len(b.Hosts)),
 	}
-	for ip, _ := range b.Hosts {
-		obj, err := t.New(b, explorer.ObjectId(ip), false)
-		if err != nil {
-			o.Errors = append(o.Errors, fmt.Sprintf("Cannot create agent \"%s\": %s", ip, err.Error()))
-		} else {
-			nodes.Objects = append(nodes.Objects, obj)
+	for ip, host := range b.Hosts {
+		if host.Type != bundle.DTAgent && host.Type != bundle.DTPublicAgent {
+			continue
 		}
+		obj, err := t.New(b, xp.ObjectId(ip))
+		if err != nil {
+			log.Printf("cannot create agent \"%s\": %s\n", ip, err.Error())
+		}
+		group.Objects = append(group.Objects, obj)
 	}
-	o.Children = append(o.Children, nodes)
-	return
+	return group, nil
 }

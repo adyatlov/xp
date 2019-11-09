@@ -3,23 +3,23 @@ package dcosagenttype
 import (
 	"fmt"
 
-	"github.com/adyatlov/bunxp/explorer"
+	"github.com/adyatlov/bunxp/xp"
 
 	"github.com/mesosphere/bun/v2/bundle"
 )
 
 func init() {
-	t := explorer.MetricType{
-		ValueType:   explorer.MTType,
+	t := xp.MetricType{
+		ValueType:   xp.MTType,
 		Name:        "dcos-agent-type",
-		MetricName:  "DC/OS Agent Type",
+		DisplayName: "DC/OS Agent Type",
 		Description: "Type of the DC/OS agent; can be \"agent\" or \"public agent\"",
 		Evaluate:    e,
 	}
-	explorer.RegisterMetricType(t)
+	xp.RegisterMetricType(t)
 }
 
-func e(b *bundle.Bundle, id explorer.ObjectId) (interface{}, error) {
+func e(b *bundle.Bundle, id xp.ObjectId) (interface{}, error) {
 	host, ok := b.Hosts[string(id)]
 	if !ok {
 		return nil, fmt.Errorf("cannot find an agent with id \"%v\" in the bundle", id)

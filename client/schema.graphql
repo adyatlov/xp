@@ -4,18 +4,18 @@ schema {
 
 type Query {
     roots: [Object]
-    object(objectId: String!, type: String!): Object
+    object(type: String!, objectId: String!): Object
     objectTypes: [ObjectType!]!
     metricTypes: [MetricType!]
 }
 
 type Object {
-    id:       ID!
-    objectId: String!
-    type:     String!
-    name:     String!
-    metrics:  [Metric!]
-    children: [ObjectGroup!]
+    id:                        ID!
+    type:                      String!
+    objectId:                  String!
+    name:                      String!
+    metrics(names: [String!]!):  [Metric!]
+    children:                  [ObjectGroup!]
 }
 
 type Metric {
@@ -41,7 +41,7 @@ type MetricType {
     name:           String!
     objectTypeName: String!
     valueType:      MetricValueType!
-    metricName:     String!
+    displayName:     String!
     description:    String!
 }
 

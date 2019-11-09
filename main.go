@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/adyatlov/bunxp/explorer"
+	"github.com/adyatlov/bunxp/xp"
 
 	"github.com/adyatlov/bunxp/server"
 
@@ -30,7 +30,7 @@ func main() {
 		fmt.Printf("Error: cannot create a bundle: %v\n", err.Error())
 		os.Exit(1)
 	}
-	e := explorer.NewExplorer(&b)
+	e := xp.NewExplorer(&b)
 	s := server.New(e)
 	log.Fatal(s.Serve())
 }

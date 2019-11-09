@@ -1,34 +1,42 @@
 package server
 
 import (
+	"encoding/base64"
 	"fmt"
 	"strings"
 
-	"github.com/adyatlov/bunxp/explorer"
+	"github.com/adyatlov/bunxp/xp"
 	"github.com/graph-gophers/graphql-go"
 )
 
 type resolver struct {
-	explorer *explorer.Explorer
+	explorer *xp.Explorer
 }
 
 func (r *resolver) Roots() (*[]*objectResolver, error) {
-	t := explorer.ObjectTypeName("cluster")
-	object, err := r.explorer.Object(t, "")
-	return &[]*objectResolver{{object: object}}, err
+	roots, err := r.explorer.Roots()
+	if err != nil {
+		return nil, err
+	}
+	resolvers := make([]*objectResolver, 0, len(roots))
+	for _, r := range roots {
+		resolvers = append(resolvers, &objectResolver{object: r})
+	}
+	return &resolvers, nil
 }
 
 func (r *resolver) Object(args struct {
 	ObjectId string
 	Type     string
 }) (*objectResolver, error) {
-	t := explorer.ObjectTypeName(args.Type)
-	object, err := r.explorer.Object(t, explorer.ObjectId(args.ObjectId))
+	t := xp.ObjectTypeName(args.Type)
+	id := xp.ObjectId(args.ObjectId)
+	object, err := r.explorer.Object(t, id)
 	return &objectResolver{object: object}, err
 }
 
 func (r *resolver) ObjectTypes() []*objectTypeResolver {
-	objTypeMap := explorer.GetObjectTypes()
+	objTypeMap := xp.GetObjectTypes()
 	objTypes := make([]*objectTypeResolver, 0, len(objTypeMap))
 	for _, t := range objTypeMap {
 		objTypes = append(objTypes, &objectTypeResolver{t: t})
@@ -37,7 +45,7 @@ func (r *resolver) ObjectTypes() []*objectTypeResolver {
 }
 
 func (r *resolver) MetricTypes() *[]*metricTypeResolver {
-	mTypeMap := explorer.GetMetricTypes()
+	mTypeMap := xp.GetMetricTypes()
 	mTypes := make([]*metricTypeResolver, 0, len(mTypeMap))
 	for _, t := range mTypeMap {
 		mTypes = append(mTypes, &metricTypeResolver{t: t})
@@ -46,43 +54,59 @@ func (r *resolver) MetricTypes() *[]*metricTypeResolver {
 }
 
 type objectResolver struct {
-	object *explorer.Object
+	object xp.Object
 }
 
 func (r *objectResolver) ID() graphql.ID {
-	return graphql.ID(string(r.object.Type) + ":::" + string(r.object.Id))
+	idSting := []byte(string(r.object.Type()) + ":::" + string(r.object.Id()))
+	return graphql.ID(base64.StdEncoding.EncodeToString(idSting))
 }
 
 func (r *objectResolver) ObjectId() string {
-	return string(r.object.Id)
+	return string(r.object.Id())
 }
 
 func (r *objectResolver) Type() string {
-	return string(r.object.Type)
+	return string(r.object.Type())
 }
 
 func (r *objectResolver) Name() string {
-	return string(r.object.Name)
+	return string(r.object.Name())
 }
 
-func (r *objectResolver) Metrics() *[]*metricResolver {
-	metricResolvers := make([]*metricResolver, 0, len(r.object.Metrics))
-	for _, metric := range r.object.Metrics {
-		metricResolvers = append(metricResolvers, &metricResolver{metric: metric})
+func (r *objectResolver) Metrics(args struct {
+	Names []string
+}) (*[]*metricResolver, error) {
+	metricTypeNames := make([]xp.MetricTypeName, 0, len(args.Names))
+	for _, m := range args.Names {
+		metricTypeNames = append(metricTypeNames, xp.MetricTypeName(m))
 	}
-	return &metricResolvers
+	metrics, err := r.object.Metrics(metricTypeNames...)
+	if err != nil {
+		return nil, err
+	}
+	metricResolvers := make([]*metricResolver, 0, len(metrics))
+	for _, metric := range metrics {
+		metricResolvers = append(metricResolvers,
+			&metricResolver{metric: metric})
+	}
+	return &metricResolvers, nil
 }
 
-func (r *objectResolver) Children() *[]*objectGroupResolver {
-	objectGroupResolvers := make([]*objectGroupResolver, 0, len(r.object.Children))
-	for _, group := range r.object.Children {
+func (r *objectResolver) Children() (*[]*objectGroupResolver, error) {
+	children, err := r.object.Children()
+	if err != nil {
+		return nil, err
+	}
+	objectGroupResolvers := make([]*objectGroupResolver, 0, len(children))
+	for _, group := range children {
 		objectGroupResolvers = append(objectGroupResolvers, &objectGroupResolver{group: &group})
 	}
-	return &objectGroupResolvers
+	return &objectGroupResolvers, nil
 }
 
 type objectGroupResolver struct {
-	group *explorer.ObjectGroup
+	group *xp.ObjectGroup
 }
 
 func (r *objectGroupResolver) Type() string {
@@ -98,7 +122,7 @@ func (r *objectGroupResolver) Objects() *[]*objectResolver {
 }
 
 type metricResolver struct {
-	metric *explorer.Metric
+	metric *xp.Metric
 }
 
 func (r *metricResolver) Type() string {
@@ -110,7 +134,7 @@ func (r *metricResolver) Value() string {
 }
 
 type objectTypeResolver struct {
-	t explorer.ObjectType
+	t xp.ObjectType
 }
 
 func (r *objectTypeResolver) Name() string {
@@ -146,7 +170,7 @@ func (r *objectTypeResolver) DefaultMetrics() *[]string {
 }
 
 type metricTypeResolver struct {
-	t explorer.MetricType
+	t xp.MetricType
 }
 
 func (r *metricTypeResolver) Name() string {
@@ -161,8 +185,8 @@ func (r *metricTypeResolver) ValueType() string {
 	return strings.ToUpper(string(r.t.ValueType))
 }
 
-func (r *metricTypeResolver) MetricName() string {
-	return string(r.t.MetricName)
+func (r *metricTypeResolver) DisplayName() string {
+	return r.t.DisplayName
 }
 
 func (r *metricTypeResolver) Description() string {

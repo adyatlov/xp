@@ -3,30 +3,31 @@ package dcosagent
 import (
 	"fmt"
 
-	"github.com/adyatlov/bunxp/explorer"
+	"github.com/adyatlov/bunxp/xp"
 
 	"github.com/mesosphere/bun/v2/bundle"
 )
 
 func init() {
-	t := explorer.ObjectType{
+	t := xp.ObjectType{
 		Name:              "agent",
 		DisplayName:       "DC/OS Agent",
 		PluralDisplayName: "DC/OS Agents",
 		Description:       "DC/OS Agent is a DC/OS worker node",
-		Find:              find,
-		Metrics:           []explorer.MetricTypeName{"dcos-agent-type"},
-		DefaultMetrics:    []explorer.MetricTypeName{"dcos-agent-type"},
+		Metrics:           []xp.MetricTypeName{"dcos-agent-type"},
+		DefaultMetrics:    []xp.MetricTypeName{"dcos-agent-type"},
+		FindObject:        findObject,
+		GetChildren:       getChildren,
 	}
-	explorer.RegisterObjectType(t)
+	xp.RegisterObjectType(t)
 }
-
-func find(b *bundle.Bundle, id explorer.ObjectId, withChildren bool) (*explorer.Object, error) {
+func findObject(b *bundle.Bundle, id xp.ObjectId) (xp.ObjectName, error) {
 	host, ok := b.Hosts[string(id)]
 	if !ok || !(host.Type == bundle.DTAgent || host.Type == bundle.DTPublicAgent) {
-		return nil, fmt.Errorf("cannot find an agent with id \"%v\" in the bundle", id)
+		return "", fmt.Errorf("cannot find an agent with id \"%v\" in the bundle", id)
 	}
-	return &explorer.Object{
-		Name: explorer.ObjectName(id),
-	}, nil
+	return xp.ObjectName(id), nil
+}
+func getChildren(*bundle.Bundle, xp.ObjectId) ([]xp.ObjectGroup, error) {
+	return make([]xp.ObjectGroup, 0, 0), nil
 }

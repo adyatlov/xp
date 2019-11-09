@@ -4,23 +4,29 @@ Bun Explorer
 Developing
 ----------
 
-1. Start client:
+1. Start server:
+
+    ```bash
+    $ go build && ./bunxp <path to bundle>
+    ```
+   
+    The best way to test the GraphQL API is https://github.com/hasura/graphqurl:
+    ```bash
+    $ gq http://localhost:7777/query -i 
+    ```
+   
+2. Start client:
 
     ```bash
     $ cd client
-    $ npm install # only first time
+    $ npm install # only the first time
     $ npm start
+    $ npm run relay --watch # in a separate terminal
     ```
 
     You don't need to relaunch the `npm start` command after you changed client files,
-    thy will be reloaded autimatically.
-
-2. Start server:
-
-    ```bash
-    $ go run .
-    ```
-
+    they will be reloaded automatically.
+    
 3. Open `http://localhost:3000`
 
 Build project

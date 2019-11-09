@@ -39,14 +39,14 @@ metricTypes
     "name": "agent-type",
     "objectTypeName": "",
     "valueType": "type",
-    "metricName": "Agent Type",
+    "displayName": "Agent Type",
     "description": "Type of the DC/OS node; can be \"agent\" or \"public agent\""
   },
   "dcos-version": {
     "name": "dcos-version",
     "objectTypeName": "cluster",
     "valueType": "version",
-    "metricName": "DC/OS version",
+    "displayName": "DC/OS version",
     "description": "DC/OS version installed on the cluster"
   }
 }

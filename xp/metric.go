@@ -1,4 +1,4 @@
-package explorer
+package xp
 
 import (
 	"fmt"
@@ -8,7 +8,6 @@ import (
 
 type MetricValueType string
 type MetricTypeName string
-type MetricName string
 
 const (
 	MTInteger    MetricValueType = "integer"
@@ -20,17 +19,17 @@ const (
 )
 
 type Metric struct {
-	Type  MetricTypeName `json:"type"`
-	Value interface{}    `json:"value"`
+	Type  MetricTypeName
+	Value interface{}
 }
 
 type MetricType struct {
-	Name           MetricTypeName                                      `json:"name"`
-	ObjectTypeName ObjectTypeName                                      `json:"objectTypeName"`
-	ValueType      MetricValueType                                     `json:"valueType"`
-	MetricName     MetricName                                          `json:"metricName"`
-	Description    string                                              `json:"description"`
-	Evaluate       func(*bundle.Bundle, ObjectId) (interface{}, error) `json:"-"`
+	Name           MetricTypeName
+	ObjectTypeName ObjectTypeName
+	ValueType      MetricValueType
+	DisplayName    string
+	Description    string
+	Evaluate       func(*bundle.Bundle, ObjectId) (interface{}, error)
 }
 
 func (t MetricType) New(b *bundle.Bundle, id ObjectId) (*Metric, error) {

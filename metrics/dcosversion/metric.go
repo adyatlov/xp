@@ -3,24 +3,24 @@ package dcosversion
 import (
 	"fmt"
 
-	"github.com/adyatlov/bunxp/explorer"
+	"github.com/adyatlov/bunxp/xp"
 
 	"github.com/mesosphere/bun/v2/bundle"
 )
 
 func init() {
-	var t = explorer.MetricType{
+	var t = xp.MetricType{
 		Name:           "dcos-version",
 		ObjectTypeName: "cluster",
-		ValueType:      explorer.MTVersion,
-		MetricName:     "DC/OS version",
+		ValueType:      xp.MTVersion,
+		DisplayName:    "DC/OS version",
 		Description:    "DC/OS version installed on the cluster",
 		Evaluate:       e,
 	}
-	explorer.RegisterMetricType(t)
+	xp.RegisterMetricType(t)
 }
 
-func e(b *bundle.Bundle, id explorer.ObjectId) (interface{}, error) {
+func e(b *bundle.Bundle, id xp.ObjectId) (interface{}, error) {
 	if len(b.Hosts) == 0 {
 		return nil, fmt.Errorf("cannot find a single host in the directory %s", b.Path)
 	}
