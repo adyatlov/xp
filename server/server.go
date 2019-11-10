@@ -29,7 +29,7 @@ func (s *Server) Serve() error {
 		&resolver{explorer: s.explorer})
 	r := mux.NewRouter()
 	r.PathPrefix("/client").Handler(http.StripPrefix("/client", http.FileServer(s.box)))
-	r.Handle("/query", &relay.Handler{Schema: schema})
+	r.Handle("/graphql", &relay.Handler{Schema: schema})
 	r.HandleFunc("/", s.redirectToClient)
 	corsHandler := cors.Default().Handler(r)
 	return http.ListenAndServe(fmt.Sprintf("%v:%v", "localhost", "7777"), corsHandler)

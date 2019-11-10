@@ -14,15 +14,13 @@ func NewExplorer(b *bundle.Bundle) *Explorer {
 	return &Explorer{bundle: b}
 }
 
-func (e *Explorer) Roots() ([]Object, error) {
+func (e *Explorer) Root() (Object, error) {
 	t := MustGetObjectType("cluster")
-	roots := make([]Object, 0, 1)
 	cluster, err := t.New(e.bundle, "")
 	if err != nil {
-		return roots, err
+		return cluster, err
 	}
-	roots = append(roots, cluster)
-	return roots, nil
+	return cluster, nil
 }
 
 func (e *Explorer) Object(n ObjectTypeName, id ObjectId) (Object, error) {

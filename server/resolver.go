@@ -13,16 +13,12 @@ type resolver struct {
 	explorer *xp.Explorer
 }
 
-func (r *resolver) Roots() (*[]*objectResolver, error) {
-	roots, err := r.explorer.Roots()
+func (r *resolver) Root() (*objectResolver, error) {
+	root, err := r.explorer.Root()
 	if err != nil {
 		return nil, err
 	}
-	resolvers := make([]*objectResolver, 0, len(roots))
-	for _, r := range roots {
-		resolvers = append(resolvers, &objectResolver{object: r})
-	}
-	return &resolvers, nil
+	return &objectResolver{object: root}, nil
 }
 
 func (r *resolver) Object(args struct {

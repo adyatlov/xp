@@ -6,7 +6,7 @@ schema {
 }
 
 type Query {
-    roots: [Object]
+    root: Object!
     object(type: String!, objectId: String!): Object
     objectTypes: [ObjectType!]!
     metricTypes: [MetricType!]

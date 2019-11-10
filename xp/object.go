@@ -41,6 +41,9 @@ func (t ObjectType) New(b *bundle.Bundle, id ObjectId) (Object, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot find object: %s", err.Error())
 	}
+	if id == "" {
+		id = ObjectId(name)
+	}
 	object := &objectImpl{
 		t:    t.Name,
 		id:   id,
