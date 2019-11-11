@@ -12,16 +12,16 @@ Developing
    
     The best way to test the GraphQL API is https://github.com/hasura/graphqurl:
     ```bash
-    $ gq http://localhost:7777/query -i 
+    $ gq http://localhost:7777/graphql -i 
     ```
    
 2. Start client:
 
     ```bash
     $ cd client
-    $ npm install # only the first time
-    $ npm start
-    $ npm run relay --watch # in a separate terminal
+    $ yarn install # only the first time
+    $ yarn run relay --watch
+    $ yarn start # in a separate terminal
     ```
 
     You don't need to relaunch the `npm start` command after you changed client files,
