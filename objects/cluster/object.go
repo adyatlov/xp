@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/adyatlov/bunxp/xp"
+	"github.com/adyatlov/xp/xp"
 
 	"github.com/mesosphere/bun/v2/bundle"
 )

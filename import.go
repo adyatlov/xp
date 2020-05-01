@@ -1,8 +1,8 @@
 package main
 
 import (
-	_ "github.com/adyatlov/bunxp/metrics/dcosagenttype"
-	_ "github.com/adyatlov/bunxp/metrics/dcosversion"
-	_ "github.com/adyatlov/bunxp/objects/cluster"
-	_ "github.com/adyatlov/bunxp/objects/dcosagent"
+	_ "github.com/adyatlov/xp/metrics/dcosagenttype"
+	_ "github.com/adyatlov/xp/metrics/dcosversion"
+	_ "github.com/adyatlov/xp/objects/cluster"
+	_ "github.com/adyatlov/xp/objects/dcosagent"
 )

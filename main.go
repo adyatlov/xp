@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/adyatlov/bunxp/xp"
+	"github.com/adyatlov/xp/xp"
 
-	"github.com/adyatlov/bunxp/server"
+	"github.com/adyatlov/xp/server"
 
 	"github.com/mesosphere/bun/v2/bundle"
 )

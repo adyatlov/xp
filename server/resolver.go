@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/adyatlov/bunxp/xp"
+	"github.com/adyatlov/xp/xp"
 	"github.com/graph-gophers/graphql-go"
 )
 

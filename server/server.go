@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/adyatlov/bunxp/xp"
+	"github.com/adyatlov/xp/xp"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/mux"
 	"github.com/graph-gophers/graphql-go"

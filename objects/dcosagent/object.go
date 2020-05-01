@@ -3,7 +3,7 @@ package dcosagent
 import (
 	"fmt"
 
-	"github.com/adyatlov/bunxp/xp"
+	"github.com/adyatlov/xp/xp"
 
 	"github.com/mesosphere/bun/v2/bundle"
 )
