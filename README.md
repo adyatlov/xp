@@ -87,6 +87,7 @@ Metric Types
 - Version
 - Timestamp
 - IP Address
+- Array of Metrics
 
 
 Metrics
