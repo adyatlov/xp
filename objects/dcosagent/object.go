@@ -17,7 +17,7 @@ func init() {
 		Metrics:           []xp.MetricTypeName{"dcos-agent-type"},
 		DefaultMetrics:    []xp.MetricTypeName{"dcos-agent-type"},
 		FindObject:        findObject,
-		GetChildren:       getChildren,
+		FindChildren:      nil,
 	}
 	xp.RegisterObjectType(t)
 }
@@ -27,7 +27,4 @@ func findObject(b *bundle.Bundle, id xp.ObjectId) (xp.ObjectName, error) {
 		return "", fmt.Errorf("cannot find an agent with id \"%v\" in the bundle", id)
 	}
 	return xp.ObjectName(id), nil
-}
-func getChildren(*bundle.Bundle, xp.ObjectId) ([]xp.ObjectGroup, error) {
-	return make([]xp.ObjectGroup, 0, 0), nil
 }

@@ -1,14 +1,13 @@
 import React from 'react';
-import ClusterBar from './ClusterBar';
+import RootBar from './RootBar';
 import graphql from 'babel-plugin-relay/macro';
 import {QueryRenderer} from 'react-relay';
 import {Environment, Network, RecordSource, Store} from 'relay-runtime';
+import ObjectView from "./ObjectView";
 
 function fetchQuery(
     operation,
-    variables,
-    cacheConfig,
-    uploadables,
+    variables
 ) {
     return fetch('http://localhost:7777/graphql', {
         method: 'POST',
@@ -35,17 +34,27 @@ const environment = new Environment({
 
 class App extends React.Component {
     render() {
+        const params = this.props.match.params;
+        let typeName = "";
+        let objectId = "";
+        if (params.typeName && params.objectId) {
+            typeName = params.typeName;
+            objectId = params.objectId;
+        }
         return (
         <QueryRenderer
             environment={environment}
             query={graphql`
-                     query App_RootName_Query {
+                     query App_Object_Query($typeName: String!, $objectId: String!) {
                         root {
-                            name
+                            ...RootBar_root
+                        }
+                        object(typeName: $typeName, objectId: $objectId) {
+                            ...ObjectView_object
                         }
                      } 
                 `}
-            variables={{}}
+            variables={{typeName: typeName, objectId: objectId}}
             render={({error, props}) => {
                 if (error) {
                     return <div>Error!<br/>{error}</div>;
@@ -55,8 +64,8 @@ class App extends React.Component {
                 }
                 return (
                     <>
-                        <ClusterBar clusterName={props.root.name}/>
-                        {/*<ObjectView/>*/}
+                        <RootBar root={props.root}/>
+                        <ObjectView object={props.object}/>
                     </>
                 );
             }}

@@ -5,6 +5,6 @@ import {BrowserRouter as Router, Route} from "react-router-dom";
 
 ReactDOM.render(
     <Router>
-        <Route path={["/o/:type/:id", "/"]} component={App}/>
+        <Route path={["/o/:typeName/:objectId/:childrenTypeName", "/o/:typeName/:objectId", "/"]} component={App}/>
     </Router>,
     document.getElementById('root'));

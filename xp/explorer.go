@@ -23,8 +23,11 @@ func (e *Explorer) Root() (Object, error) {
 	return cluster, nil
 }
 
-func (e *Explorer) Object(n ObjectTypeName, id ObjectId) (Object, error) {
-	t, err := GetObjectType(n)
+func (e *Explorer) Object(typeName ObjectTypeName, id ObjectId) (Object, error) {
+	if typeName == "" {
+		return e.Root()
+	}
+	t, err := GetObjectType(typeName)
 	if err != nil {
 		return nil, fmt.Errorf("cannot get object type: %s", err.Error())
 	}

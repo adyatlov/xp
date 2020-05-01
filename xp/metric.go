@@ -19,8 +19,8 @@ const (
 )
 
 type Metric struct {
-	Type  MetricTypeName
-	Value interface{}
+	TypeName MetricTypeName
+	Value    interface{}
 }
 
 type MetricType struct {
@@ -34,7 +34,7 @@ type MetricType struct {
 
 func (t MetricType) New(b *bundle.Bundle, id ObjectId) (*Metric, error) {
 	m := &Metric{
-		Type: t.Name,
+		TypeName: t.Name,
 	}
 	var err error
 	if m.Value, err = t.Evaluate(b, id); err != nil {

@@ -18,7 +18,7 @@ func init() {
 		Metrics:           []xp.MetricTypeName{"dcos-version"},
 		DefaultMetrics:    []xp.MetricTypeName{"dcos-version"},
 		FindObject:        findObject,
-		GetChildren:       getChildren,
+		FindChildren:      map[xp.ObjectTypeName]func(*bundle.Bundle) ([]xp.ObjectId, error){"agent": findAgents},
 	}
 	xp.RegisterObjectType(t)
 }
@@ -41,7 +41,7 @@ func findObject(b *bundle.Bundle, id xp.ObjectId) (xp.ObjectName, error) {
 	return xp.ObjectName(config.ClusterName), nil
 }
 
-func getChildren(b *bundle.Bundle, id xp.ObjectId) ([]xp.ObjectGroup, error) {
+func getChildren(b *bundle.Bundle, id xp.ObjectId, count bool, t ...xp.ObjectTypeName) ([]xp.ObjectGroup, error) {
 	groups := make([]xp.ObjectGroup, 0, 1)
 	group, err := findAgents(b)
 	if err != nil {
@@ -51,12 +51,19 @@ func getChildren(b *bundle.Bundle, id xp.ObjectId) ([]xp.ObjectGroup, error) {
 	return groups, nil
 }
 
-func findAgents(b *bundle.Bundle) (xp.ObjectGroup, error) {
-	t := xp.MustGetObjectType("agent")
-	group := xp.ObjectGroup{
-		Type:    t.Name,
-		Objects: make([]xp.Object, 0, len(b.Hosts)),
+func countAgents(b *bundle.Bundle) int {
+	count := 0
+	for _, host := range b.Hosts {
+		if host.Type == bundle.DTAgent || host.Type == bundle.DTPublicAgent {
+			count++
+		}
 	}
+	return count
+}
+
+func findAgents(b *bundle.Bundle) ([]xp.ObjectId, error) {
+	t := xp.MustGetObjectType("agent")
+	ids := make([]xp.ObjectId, 0, len(b.Agents()))
 	for ip, host := range b.Hosts {
 		if host.Type != bundle.DTAgent && host.Type != bundle.DTPublicAgent {
 			continue
@@ -67,5 +74,6 @@ func findAgents(b *bundle.Bundle) (xp.ObjectGroup, error) {
 		}
 		group.Objects = append(group.Objects, obj)
 	}
+	group.Count = len(group.Objects)
 	return group, nil
 }

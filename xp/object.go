@@ -12,19 +12,6 @@ type ObjectTypeName string
 type ObjectId string
 type ObjectName string
 
-type Object interface {
-	Type() ObjectTypeName
-	Id() ObjectId
-	Name() ObjectName
-	Metrics(...MetricTypeName) ([]*Metric, error)
-	Children() ([]ObjectGroup, error)
-}
-
-type ObjectGroup struct {
-	Type    ObjectTypeName
-	Objects []Object
-}
-
 type ObjectType struct {
 	Name              ObjectTypeName
 	DisplayName       string
@@ -33,7 +20,22 @@ type ObjectType struct {
 	Metrics           []MetricTypeName
 	DefaultMetrics    []MetricTypeName
 	FindObject        func(*bundle.Bundle, ObjectId) (ObjectName, error)
-	GetChildren       func(*bundle.Bundle, ObjectId) ([]ObjectGroup, error)
+	FindChildren      map[ObjectTypeName]func(*bundle.Bundle) ([]ObjectId, error)
+}
+
+type Object interface {
+	TypeName() ObjectTypeName
+	Id() ObjectId
+	Name() ObjectName
+	Metrics(...MetricTypeName) ([]*Metric, error)
+	Children(...ObjectTypeName) ([]ObjectGroup, error)
+	CountChildren(...ObjectTypeName) ([]ObjectGroup, error)
+}
+
+type ObjectGroup struct {
+	TypeName ObjectTypeName
+	Objects  []Object
+	Count    int
 }
 
 func (t ObjectType) New(b *bundle.Bundle, id ObjectId) (Object, error) {
@@ -45,22 +47,79 @@ func (t ObjectType) New(b *bundle.Bundle, id ObjectId) (Object, error) {
 		id = ObjectId(name)
 	}
 	object := &objectImpl{
-		t:    t.Name,
+		t:    t,
 		id:   id,
 		name: name,
-		children: func() ([]ObjectGroup, error) {
-			return t.GetChildren(b, id)
-		},
-		metrics: func(mm []MetricTypeName) ([]*Metric, error) {
-			return t.getMetrics(b, id, mm)
-		},
 	}
 	return object, nil
+}
+
+func (t ObjectType) getChildren(b *bundle.Bundle,
+	objectId ObjectId,
+	onlyCount bool,
+	childrenTypeNames []ObjectTypeName) ([]ObjectGroup, error) {
+	if len(childrenTypeNames) == 0 {
+		childrenTypeNames = make([]ObjectTypeName, 0, len(t.FindChildren))
+		for typeName, _ := range t.FindChildren {
+			childrenTypeNames = append(childrenTypeNames, typeName)
+		}
+	}
+	if len(t.FindChildren) < len(childrenTypeNames) {
+		return nil, fmt.Errorf("%v children type names specified, but only %v registered",
+			len(childrenTypeNames), len(t.FindChildren))
+	}
+	groups := make([]ObjectGroup, 0, len(childrenTypeNames))
+	for _, childrenTypeName := range childrenTypeNames {
+		found := false
+		for registeredTypeName, findChildren := range t.FindChildren {
+			if childrenTypeName != registeredTypeName {
+				continue
+			}
+			found = true
+			childrenIds, err := findChildren()
+			if err != nil {
+				return nil, fmt.Errorf("error occurred when finding children of object type \"%v\"", childrenTypeName)
+			}
+			var group ObjectGroup
+			if !onlyCount {
+				children := make([]Object, 0, len(childrenIds))
+				childrenType := MustGetObjectType(childrenTypeName)
+				for _, childrenId := range childrenIds {
+					object, err := childrenType.New(b, childrenId)
+					if err != nil {
+						log.Printf("cannot create object of type \"%v\" and ID %v: %v\n", childrenTypeName, childrenId, err)
+						break
+					}
+					children = append(children, object)
+				}
+				group = ObjectGroup{
+					TypeName: childrenTypeName,
+					Objects:  children,
+					Count:    len(children),
+				}
+			} else {
+				group = ObjectGroup{
+					TypeName: childrenTypeName,
+					Count:    len(childrenIds),
+				}
+			}
+			groups = append(groups, group)
+			break
+		}
+		if !found {
+			return nil, fmt.Errorf("requested children type \"%v\" doesn't exist for object type \"%v\"",
+				childrenTypeName, t.Name)
+		}
+	}
+	return groups, nil
 }
 
 func (t ObjectType) getMetrics(b *bundle.Bundle,
 	id ObjectId,
 	mm []MetricTypeName) ([]*Metric, error) {
+	if len(mm) == 0 {
+		mm = t.Metrics
+	}
 	metrics := make([]*Metric, 0, len(mm))
 	for _, requestedMetric := range mm {
 		found := false
@@ -80,9 +139,8 @@ func (t ObjectType) getMetrics(b *bundle.Bundle,
 			break
 		}
 		if !found {
-			return metrics,
-				fmt.Errorf("reguested metric \"%v\" doesn't exist for object type \"%v\"",
-					requestedMetric, t.Name)
+			return nil, fmt.Errorf("reguested metric \"%v\" doesn't exist for object type \"%v\"",
+				requestedMetric, t.Name)
 		}
 	}
 	return metrics, nil
@@ -91,7 +149,7 @@ func (t ObjectType) getMetrics(b *bundle.Bundle,
 func sortChildren(children []ObjectGroup) {
 	types := GetObjectTypes()
 	sort.Slice(children, func(i, j int) bool {
-		return types[children[i].Type].PluralDisplayName < types[children[j].Type].PluralDisplayName
+		return types[children[i].TypeName].PluralDisplayName < types[children[j].TypeName].PluralDisplayName
 	})
 	for _, c := range children {
 		sort.Slice(c.Objects, func(i, j int) bool {
@@ -101,15 +159,14 @@ func sortChildren(children []ObjectGroup) {
 }
 
 type objectImpl struct {
-	t        ObjectTypeName
-	id       ObjectId
-	name     ObjectName
-	children func() ([]ObjectGroup, error)
-	metrics  func([]MetricTypeName) ([]*Metric, error)
+	b    *bundle.Bundle
+	t    ObjectType
+	id   ObjectId
+	name ObjectName
 }
 
-func (o *objectImpl) Type() ObjectTypeName {
-	return o.t
+func (o *objectImpl) TypeName() ObjectTypeName {
+	return o.t.Name
 }
 
 func (o *objectImpl) Id() ObjectId {
@@ -120,10 +177,14 @@ func (o *objectImpl) Name() ObjectName {
 	return o.name
 }
 
-func (o *objectImpl) Metrics(mm ...MetricTypeName) ([]*Metric, error) {
-	return o.metrics(mm)
+func (o *objectImpl) Children(t ...ObjectTypeName) ([]ObjectGroup, error) {
+	return o.t.getChildren(o.b, o.id, false, t)
 }
 
-func (o *objectImpl) Children() ([]ObjectGroup, error) {
-	return o.children()
+func (o *objectImpl) CountChildren(t ...ObjectTypeName) ([]ObjectGroup, error) {
+	return o.t.getChildren(o.b, o.id, true, t)
+}
+
+func (o *objectImpl) Metrics(mm ...MetricTypeName) ([]*Metric, error) {
+	return o.t.getMetrics(o.b, o.id, mm)
 }

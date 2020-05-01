@@ -23,9 +23,9 @@ func (r *resolver) Root() (*objectResolver, error) {
 
 func (r *resolver) Object(args struct {
 	ObjectId string
-	Type     string
+	TypeName string
 }) (*objectResolver, error) {
-	t := xp.ObjectTypeName(args.Type)
+	t := xp.ObjectTypeName(args.TypeName)
 	id := xp.ObjectId(args.ObjectId)
 	object, err := r.explorer.Object(t, id)
 	return &objectResolver{object: object}, err
@@ -54,7 +54,7 @@ type objectResolver struct {
 }
 
 func (r *objectResolver) ID() graphql.ID {
-	idSting := []byte(string(r.object.Type()) + ":::" + string(r.object.Id()))
+	idSting := []byte(string(r.object.TypeName()) + ":::" + string(r.object.Id()))
 	return graphql.ID(base64.StdEncoding.EncodeToString(idSting))
 }
 
@@ -62,8 +62,8 @@ func (r *objectResolver) ObjectId() string {
 	return string(r.object.Id())
 }
 
-func (r *objectResolver) Type() string {
-	return string(r.object.Type())
+func (r *objectResolver) TypeName() string {
+	return string(r.object.TypeName())
 }
 
 func (r *objectResolver) Name() string {
@@ -71,10 +71,14 @@ func (r *objectResolver) Name() string {
 }
 
 func (r *objectResolver) Metrics(args struct {
-	Names []string
+	Names *[]string
 }) (*[]*metricResolver, error) {
-	metricTypeNames := make([]xp.MetricTypeName, 0, len(args.Names))
-	for _, m := range args.Names {
+	if args.Names == nil {
+		empty := make([]string, 0, 0)
+		args.Names = &empty
+	}
+	metricTypeNames := make([]xp.MetricTypeName, 0, len(*args.Names))
+	for _, m := range *args.Names {
 		metricTypeNames = append(metricTypeNames, xp.MetricTypeName(m))
 	}
 	metrics, err := r.object.Metrics(metricTypeNames...)
@@ -89,8 +93,33 @@ func (r *objectResolver) Metrics(args struct {
 	return &metricResolvers, nil
 }
 
-func (r *objectResolver) Children() (*[]*objectGroupResolver, error) {
-	children, err := r.object.Children()
+func (r *objectResolver) Children(args struct {
+	TypeNames *[]string
+}) (*[]*objectGroupResolver, error) {
+	return r.children(args.TypeNames, false)
+}
+
+func (r *objectResolver) ChildrenCount(args struct {
+	TypeNames *[]string
+}) (*[]*objectGroupResolver, error) {
+	return r.children(args.TypeNames, true)
+}
+
+func (r *objectResolver) children(tt *[]string, count bool) (*[]*objectGroupResolver, error) {
+	var typeNames []xp.ObjectTypeName
+	if tt != nil {
+		typeNames := make([]xp.ObjectTypeName, 0, len(*tt))
+		for _, typeName := range *tt {
+			typeNames = append(typeNames, xp.ObjectTypeName(typeName))
+		}
+	}
+	var err error
+	var children []xp.ObjectGroup
+	if count {
+		children, err = r.object.Children(typeNames...)
+	} else {
+		children, err = r.object.CountChildren(typeNames...)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -105,8 +134,8 @@ type objectGroupResolver struct {
 	group *xp.ObjectGroup
 }
 
-func (r *objectGroupResolver) Type() string {
-	return string(r.group.Type)
+func (r *objectGroupResolver) TypeName() string {
+	return string(r.group.TypeName)
 }
 
 func (r *objectGroupResolver) Objects() *[]*objectResolver {
@@ -117,12 +146,16 @@ func (r *objectGroupResolver) Objects() *[]*objectResolver {
 	return &objectResolvers
 }
 
+func (r *objectGroupResolver) Count() int32 {
+	return int32(r.group.Count)
+}
+
 type metricResolver struct {
 	metric *xp.Metric
 }
 
-func (r *metricResolver) Type() string {
-	return string(r.metric.Type)
+func (r *metricResolver) TypeName() string {
+	return string(r.metric.TypeName)
 }
 
 func (r *metricResolver) Value() string {

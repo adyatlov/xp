@@ -88,3 +88,9 @@ Metric Types
 - Timestamp
 - IP Address
 
+
+Metrics
+-------
+
+Hostname for agent
+

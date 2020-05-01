@@ -3,38 +3,55 @@ import ObjectTypeName from "./ObjectType";
 import MetricTypeName from "./MetricType";
 import ObjectLink from "./ObjectLink";
 
-function ObjectTable(props) {
-    const objects = props.objects;
-    const o = objects[0];
-    return (
-        <table className="table table-bordered">
-            <thead>
-            <tr>
-                <th scope="col">
-                    <ObjectTypeName name={o.type}/>
-                </th>
-                {o.metrics.map(m => (
-                    <th key={m.type} scope="col">
-                        <MetricTypeName name={m.type}/>
+class ObjectTable extends React.Component {
+    render() {
+        const o = props.objects;
+        if (!o) {
+            return (
+                <div>No objects</div>
+            );
+        }
+        return (
+            <table className="table table-bordered">
+                <thead>
+                <tr>
+                    <th scope="col">
+                        <ObjectTypeName name={props.typeName}/>
                     </th>
-                ))}
-            </tr>
-            </thead>
-            <tbody>
-            {objects.map(obj => (
-                <tr key={obj.id}>
-                    <td>
-                        <ObjectLink handleSelectObject={props.handleSelectObject} object={obj}/>
-                    </td>
-                    {obj.metrics.map(m => (
-                        <td key={m.type}>{m.value}</td>
+                    {o[0].metrics.map(m => (
+                        <th key={m.typeName} scope="col">
+                            <MetricTypeName name={m.typeName}/>
+                        </th>
                     ))}
                 </tr>
-            ))}
-            </tbody>
-        </table>
-    );
+                </thead>
+                <tbody>
+                {o.map(obj => (
+                    <tr key={obj.objectId}>
+                        <td>
+                            <ObjectLink typeName={props.typeName} objectId={obj.objectId}>{obj.name}</ObjectLink>
+                        </td>
+                        {obj.metrics.map(m => (
+                            <td key={m.typeName}>{m.value}</td>
+                        ))}
+                    </tr>
+                ))}
+                </tbody>
+            </table>
+        );
+    }
 }
 
 export default ObjectTable;
 
+function childrenByType(object, typeName) {
+    if (!object || !object.children || !typeName) {
+        return null;
+    }
+    for (let i = 0; i < object.children.length; i++) {
+        if (object.children[i].typeName === typeName) {
+            return object.children[i].objects
+        }
+    }
+    return null;
+}
