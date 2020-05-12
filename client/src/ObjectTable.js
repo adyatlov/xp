@@ -4,7 +4,7 @@ import MetricTypeName from "./MetricType";
 import ObjectLink from "./ObjectLink";
 
 class ObjectTable extends React.Component {
-    render() {
+    render(props) {
         const o = props.objects;
         if (!o) {
             return (

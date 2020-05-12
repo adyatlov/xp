@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/adyatlov/xp/xp"
+	"github.com/adyatlov/xp/gql"
+
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/mux"
 	"github.com/graph-gophers/graphql-go"
@@ -13,20 +14,19 @@ import (
 )
 
 type Server struct {
-	box      *packr.Box
-	explorer *xp.Explorer
+	box    *packr.Box
+	schema *gql.Schema
 }
 
-func New(e *xp.Explorer) *Server {
+func New() *Server {
 	s := &Server{}
-	s.explorer = e
+	s.schema = gql.NewSchema()
 	s.box = packr.New("client", "../client/build")
 	return s
 }
 
 func (s *Server) Serve() error {
-	schema := graphql.MustParseSchema(schemaString,
-		&resolver{explorer: s.explorer})
+	schema := graphql.MustParseSchema(gql.SchemaString, s.schema)
 	r := mux.NewRouter()
 	r.PathPrefix("/client").Handler(http.StripPrefix("/client", http.FileServer(s.box)))
 	r.Handle("/graphql", &relay.Handler{Schema: schema})

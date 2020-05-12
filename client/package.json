@@ -3,12 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "react": "^16.11.0",
-    "react-dom": "^16.11.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
     "react-relay": "^7.1.0",
     "react-router-dom": "^5.1.2",
-    "react-scripts": "3.2.0",
-    "relay-runtime": "^7.1.0"
+    "react-scripts": "^3.4.1"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -33,10 +32,9 @@
     ]
   },
   "devDependencies": {
-    "babel-plugin-macros": "^2.6.1",
+    "babel-plugin-macros": "^2.8.0",
     "babel-plugin-relay": "^7.1.0",
-    "graphql": "^14.5.8",
-    "relay-compiler": "^7.1.0",
-    "relay-config": "^7.1.0"
+    "graphql": "^14.6.0",
+    "relay-compiler": "^9.1.0"
   }
 }
