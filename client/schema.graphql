@@ -1,57 +1,68 @@
-schema {
-    query: Query
-}
-
-type Query {
-    root: Object!
-    object(typeName: String!, objectId: String!): Object
-    objectTypes: [ObjectType!]!
-    metricTypes: [MetricType!]
-}
-
-type Object {
-    id:                             ID!
-    typeName:                       String!
-    objectId:                       String!
-    name:                           String!
-    metrics(names: [String!]):      [Metric!]
-    children(typeNames: [String!]): [ObjectGroup!]
-    childrenCount(typeNames: [String!]): [ObjectGroup!]
-}
-
-type Metric {
-    typeName:  String!
-    value: String!
-}
-
-type ObjectGroup {
-    typeName:    String!
-    objects: [Object!]
-    count: Int!
-}
-
-type ObjectType {
-    name:              String!
-    displayName:       String!
-    pluralDisplayName: String!
-    description:       String!
-    metrics:           [String!]
-    defaultMetrics:    [String!]
-}
-
-type MetricType {
-    name:           String!
-    objectTypeName: String!
-    valueType:      MetricValueType!
-    displayName:    String!
-    description:    String!
-}
-
-enum MetricValueType {
+enum PropertyValueType {
     INTEGER
     REAL
     PERCENTAGE
     VERSION
     TIMESTAMP
     TYPE
+    FILE
+}
+
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type Query {
+    object(datasetId: ID!, id: ID!): Object!
+    datasets(Ids: [ID!]): [Dataset!]!
+    plugins(url: String): [Plugin!]!
+}
+
+type Mutation {
+    addDataset(plugin: String!, url: String!): Dataset!
+    removeDataset(id: String!): Boolean!
+}
+
+type Object {
+    type:                           ObjectType!
+    id:								ID!
+    name:                           String!
+    children(typeNames: [String!]): [ObjectGroup!]!
+    properties(typeNames: [String!]):  [Property!]!
+}
+
+type ObjectGroup {
+    type: ObjectType!
+    objects:  [Object!]!
+    total:    Int!
+}
+
+type ObjectType {
+    name:           String!
+    pluralName: 	String!
+    description:    String!
+    properties:        [PropertyType!]!
+    defaultProperties: [String!]!
+}
+
+type Property {
+    type:  PropertyType!
+    value: String!
+}
+
+type PropertyType {
+    name:           String!
+    valueType:      PropertyValueType!
+    description:    String!
+}
+
+type Dataset {
+    id:   ID!
+    root: Object!
+}
+
+type Plugin {
+    name: String!
+    description: String!
 }

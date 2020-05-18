@@ -9,11 +9,12 @@ import (
 )
 
 func init() {
-	plugin := NewPlugin("example", "example company plugin", open)
+	plugin := NewPlugin("Organization example", "example company plugin", open)
 	data.RegisterPlugin(plugin)
 }
 
 func open(urlStr string) (data.Dataset, error) {
+	// example.com/?minEmployee=10&maxEmployee=100&nDivision=11
 	u, err := url.Parse(urlStr)
 	if err != nil {
 		return nil, err

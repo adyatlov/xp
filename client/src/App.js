@@ -1,76 +1,80 @@
 import React from 'react';
-import RootBar from './RootBar';
-import graphql from 'babel-plugin-relay/macro';
-import {QueryRenderer} from 'react-relay';
-import {Environment, Network, RecordSource, Store} from 'relay-runtime';
-import ObjectView from "./ObjectView";
+import { BrowserRouter as Router, Switch, Route, useLocation} from "react-router-dom";
 
-function fetchQuery(
-    operation,
-    variables
-) {
-    return fetch('http://localhost:7777/graphql', {
-        method: 'POST',
-        headers: {
-            // Add authentication and other headers here
-            'content-type': 'application/json'
-        },
-        body: JSON.stringify({
-            query: operation.text, // GraphQL text from input
-            variables,
-        }),
-    }).then(response => {
-        return response.json();
-    });
+import TopBar from "./TopBar";
+import ObjectSidePanel from "./ObjectSidePanel";
+import Properties from "./Properties";
+import ChildrenTable from "./ChildrenTable";
+import Breadcrumb from "./Breadcrumb";
+
+export default function App() {
+    return (
+        <Router>
+            <Switch>
+                <Route path="/properties/:datasetId/:objectId">
+                    <Layout mainPanel={<Properties/>} />
+                </Route>
+                <Route path="/children/:datasetId/:objectId/:childrenTypeName">
+                    <Layout mainPanel={<ChildrenTable />} />
+                </Route>
+                <Route exact path="/">
+                    <Layout message={<NoDatasets />}/>
+                </Route>
+                <Route path="*">
+                    <Layout message={<NoMatch />} />
+                </Route>
+            </Switch>
+        </Router>
+    );
 }
 
-const network = Network.create(fetchQuery);
-const store = new Store(new RecordSource());
-
-const environment = new Environment({
-    network,
-    store
-});
-
-class App extends React.Component {
-    render() {
-        const params = this.props.match.params;
-        let typeName = "";
-        let objectId = "";
-        if (params.typeName && params.objectId) {
-            typeName = params.typeName;
-            objectId = params.objectId;
-        }
+function Layout(props) {
+    if (props.mainPanel) {
         return (
-        <QueryRenderer
-            environment={environment}
-            query={graphql`
-                     query App_Object_Query($typeName: String!, $objectId: String!) {
-                        root {
-                            ...RootBar_root
-                        }
-                        object(typeName: $typeName, objectId: $objectId) {
-                            ...ObjectView_object
-                        }
-                     } 
-                `}
-            variables={{typeName: typeName, objectId: objectId}}
-            render={({error, props}) => {
-                if (error) {
-                    return <div>Error!<br/>{error}</div>;
-                }
-                if (!props) {
-                    return <div>Loading...</div>;
-                }
-                return (
-                    <>
-                        <RootBar root={props.root}/>
-                        <ObjectView object={props.object}/>
-                    </>
-                );
-            }}
-        />);
+            <>
+                <TopBar/>
+                <div id="root" className="container-fluid">
+                    <Breadcrumb/>
+                    <div className="row">
+                        <div className="col-3"><ObjectSidePanel /></div>
+                        <div className="col-9">{props.mainPanel}</div>
+                    </div>
+                </div>
+            </>
+        );
     }
+    return (
+        <>
+            <TopBar/>
+            <div id="root" className="container">
+                {props.message}
+            </div>
+        </>
+    );
 }
-
-export default App;
+function NoDatasets() {
+    return (
+        <div className="row mt-5">
+            <div className="col">
+                <div className="alert alert-light" role="alert">
+                    <h4 className="alert-heading">Welcome to XP!</h4>
+                    <p>There are no open datasets at the moment. Please insert a dataset URL, choose one of the compatible
+                        plugins, and press "Open".</p>
+                </div>
+            </div>
+        </div>
+    );
+}
+function NoMatch() {
+    let location = useLocation();
+    return (
+        <div className="row mt-5">
+            <div className="col">
+                <div className="alert alert-warning" role="alert">
+                    <h4 className="alert-heading">Error</h4>
+                    <p>Page <code>{location.pathname}</code> not found.</p>
+                </div>
+            </div>
+        </div>
+    );
+}

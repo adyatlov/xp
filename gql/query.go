@@ -53,7 +53,7 @@ func (q *Query) Datasets(args struct {
 
 func (q *Query) Plugins(args struct{ Url *string }) ([]*pluginResolver, error) {
 	var plugins []data.Plugin
-	if args.Url == nil {
+	if args.Url == nil || *args.Url == "" {
 		plugins = data.GetPlugins()
 	} else {
 		var err error
