@@ -1,4 +1,4 @@
-package plugin
+package example
 
 import "github.com/adyatlov/xp/data"
 

@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/adyatlov/xp/gql"
@@ -29,7 +30,7 @@ func (s *Server) Serve() error {
 	schema := graphql.MustParseSchema(gql.SchemaString, s.schema)
 	r := mux.NewRouter()
 	r.PathPrefix("/client").Handler(http.StripPrefix("/client", http.FileServer(s.box)))
-	r.Handle("/graphql", &relay.Handler{Schema: schema})
+	r.Handle("/graphql", &DebugHandler{&relay.Handler{Schema: schema}})
 	r.HandleFunc("/", s.redirectToClient)
 	corsHandler := cors.Default().Handler(r)
 	return http.ListenAndServe(fmt.Sprintf("%v:%v", "localhost", "7777"), corsHandler)
@@ -37,4 +38,13 @@ func (s *Server) Serve() error {
 
 func (s *Server) redirectToClient(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/client", http.StatusTemporaryRedirect)
+}
+
+type DebugHandler struct {
+	handler http.Handler
+}
+
+func (d *DebugHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	log.Println("Request :)")
+	d.handler.ServeHTTP(w, r)
 }

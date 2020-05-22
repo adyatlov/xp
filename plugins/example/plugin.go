@@ -1,4 +1,4 @@
-package plugin
+package example
 
 import (
 	"net/url"
@@ -9,29 +9,44 @@ import (
 )
 
 func init() {
-	plugin := NewPlugin("Organization example", "example company plugin", open)
+	plugin := NewPlugin("Organization Example Plugin", "example company plugin", open, compatible)
 	data.RegisterPlugin(plugin)
 }
 
 func open(urlStr string) (data.Dataset, error) {
-	// example.com/?minEmployee=10&maxEmployee=100&nDivision=11
-	u, err := url.Parse(urlStr)
-	if err != nil {
-		return nil, err
-	}
-	minEmployee, err := strconv.Atoi(u.Query().Get("minEmployee"))
-	if err != nil {
-		return nil, err
-	}
-	maxEmployee, err := strconv.Atoi(u.Query().Get("maxEmployee"))
-	if err != nil {
-		return nil, err
-	}
-	nDivision, err := strconv.Atoi(u.Query().Get("nDivision"))
+	minEmployee, maxEmployee, nDivision, err := parseURL(urlStr)
 	if err != nil {
 		return nil, err
 	}
 	return generateDataset(minEmployee, maxEmployee, nDivision), nil
+}
+
+// example.com/?minEmployee=10&maxEmployee=100&nDivision=11
+func parseURL(urlStr string) (int, int, int, error) {
+	u, err := url.Parse(urlStr)
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	minEmployee, err := strconv.Atoi(u.Query().Get("minEmployee"))
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	maxEmployee, err := strconv.Atoi(u.Query().Get("maxEmployee"))
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	nDivision, err := strconv.Atoi(u.Query().Get("nDivision"))
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	return minEmployee, maxEmployee, nDivision, nil
+}
+
+func compatible(urlStr string) (bool, error) {
+	if _, _, _, err := parseURL(urlStr); err != nil {
+		return false, nil
+	}
+	return true, nil
 }
 
 func generateDataset(minEmployee, maxEmployee, nDivision int) *Dataset {

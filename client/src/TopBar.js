@@ -13,15 +13,15 @@ export default function TopBar() {
                             DC/OS Cluster Diagnostics Bundle: Production
                         </button>
                         <div className="dropdown-menu" aria-labelledby="datasetsDropdown">
-                            <a className="dropdown-item" href="#">DC/OS Cluster Diagnostics Bundle: Development</a>
-                            <a className="dropdown-item" href="#">DC/OS Cluster Diagnostics Bundle: Test</a>
-                            <a className="dropdown-item" href="#">DC/OS Service Diagnostics Bundle: kafka-prod</a>
+                            <button className="dropdown-item" id={1}>DC/OS Cluster Diagnostics Bundle: Development</button>
+                            <button className="dropdown-item" id={2}>DC/OS Cluster Diagnostics Bundle: Test</button>
+                            <button className="dropdown-item" id={3}>DC/OS Service Diagnostics Bundle: kafka-prod</button>
                         </div>
                     </div>
                     <button type="button" className="btn btn-dark text-nowrap">Close</button>
                 </div>
             </form>
-            <a className="navbar-brand">XP</a>
+            <span className="navbar-brand">XP</span>
         </nav>
     );
 }

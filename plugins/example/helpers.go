@@ -1,4 +1,4 @@
-package plugin
+package example
 
 import (
 	"fmt"
@@ -10,10 +10,19 @@ type Plugin struct {
 	name        data.PluginName
 	description string
 	open        func(url string) (data.Dataset, error)
+	compatible  func(url string) (bool, error)
 }
 
-func NewPlugin(name data.PluginName, description string, open func(url string) (data.Dataset, error)) *Plugin {
-	return &Plugin{name: name, description: description, open: open}
+func NewPlugin(name data.PluginName,
+	description string,
+	open func(url string) (data.Dataset, error),
+	compatible func(url string) (bool, error)) *Plugin {
+	return &Plugin{
+		name:        name,
+		description: description,
+		open:        open,
+		compatible:  compatible,
+	}
 }
 
 func (p *Plugin) Name() data.PluginName {
@@ -29,10 +38,7 @@ func (p *Plugin) Open(url string) (data.Dataset, error) {
 }
 
 func (p *Plugin) Compatible(url string) (bool, error) {
-	if _, err := p.open(url); err != nil {
-		return false, nil
-	}
-	return true, nil
+	return p.compatible(url)
 }
 
 type Dataset struct {
