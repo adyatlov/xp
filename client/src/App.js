@@ -6,77 +6,81 @@ import ObjectSidePanel from "./ObjectSidePanel";
 import Properties from "./Properties";
 import ChildrenTable from "./ChildrenTable";
 import Breadcrumb from "./Breadcrumb";
+import {QueryRenderer} from "react-relay";
+import environment from "./relayEnvironment";
+import graphql from "babel-plugin-relay/macro";
 
 export default function App() {
     return (
         <Router>
             <Switch>
-                <Route path="/properties/:datasetId/:objectId">
-                    <Layout mainPanel={<Properties/>} />
+                <Route path="/datasets/:datasetId/:objectId/:childrenTypeName">
+                    <DatasetLayout mainPanel={<ChildrenTable/>}/>
                 </Route>
-                <Route path="/children/:datasetId/:objectId/:childrenTypeName">
-                    <Layout mainPanel={<ChildrenTable />} />
+                <Route path="/datasets/:datasetId/:objectId">
+                    <DatasetLayout mainPanel={<Properties/>}/>
                 </Route>
                 <Route exact path="/">
-                    <Layout message={<NoDatasets />}/>
+                    <SelectDatasets/>
                 </Route>
                 <Route path="*">
-                    <Layout message={<NoMatch />} />
+                    <NoMatch/>
                 </Route>
             </Switch>
         </Router>
     );
 }
 
-function Layout(props) {
-    if (props.mainPanel) {
-        return (
-            <>
-                <TopBar/>
-                <div id="root" className="container-fluid">
-                    <Breadcrumb/>
-                    <div className="row">
-                        <div className="col-3"><ObjectSidePanel /></div>
-                        <div className="col-9">{props.mainPanel}</div>
-                    </div>
-                </div>
-            </>
-        );
-    }
+function DatasetLayout(props) {
     return (
         <>
             <TopBar/>
-            <div id="root" className="container">
-                {props.message}
+            <div id="root" className="container-fluid">
+                <Breadcrumb/>
+                <div className="row">
+                    <div className="col-3"><ObjectSidePanel /></div>
+                    <div className="col-9">{props.mainPanel}</div>
+                </div>
             </div>
         </>
     );
 }
 
-function NoDatasets() {
+function SelectDatasets() {
     return (
-        <div className="row mt-5">
-            <div className="col">
-                <div className="alert alert-light" role="alert">
-                    <h4 className="alert-heading">Welcome to XP!</h4>
-                    <p>There are no open datasets at the moment. Please insert a dataset URL, choose one of the compatible
-                        plugins, and press "Open".</p>
+        <>
+            <TopBar/>
+            <div id="root" className="container">
+                <div className="row mt-5">
+                    <div className="col">
+                        <div className="alert alert-light" role="alert">
+                            <h4 className="alert-heading">Welcome to XP!</h4>
+                            <p>Please, select a dataset. If there are no open datasets, or they are not what you need,
+                                open a new one: insert a dataset URL, choose one of the compatible plugins,
+                                and press "Open".</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }
 
 function NoMatch() {
     let location = useLocation();
     return (
-        <div className="row mt-5">
-            <div className="col">
-                <div className="alert alert-warning" role="alert">
-                    <h4 className="alert-heading">Error</h4>
-                    <p>Page <code>{location.pathname}</code> not found.</p>
+        <>
+            <TopBar/>
+            <div id="root" className="container">
+                <div className="row mt-5">
+                    <div className="col">
+                        <div className="alert alert-warning" role="alert">
+                            <h4 className="alert-heading">Error</h4>
+                            <p>Page <code>{location.pathname}</code> not found.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }

@@ -9,7 +9,12 @@ import (
 )
 
 func init() {
-	plugin := NewPlugin("Organization Example Plugin", "example company plugin", open, compatible)
+	plugin := NewPlugin("Example Plugin",
+		"Example plugin demonstrates possibilities of XP using a fake organization structure.\n"+
+			"plugin URL should look like example.com/?minEmployee=10&maxEmployee=100&nDivision=11. "+
+			"Where minEmployee and maxEmployee set min and max employees per division, and "+
+			"nDivision is an amount of divisions in the organization",
+		open, compatible)
 	data.RegisterPlugin(plugin)
 }
 

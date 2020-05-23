@@ -1,11 +1,11 @@
 import React from 'react'
-import Plugin from "./Plugin";
+import DatasetOpener from "./DatasetOpener";
 
 export default function TopBar() {
     return (
         <nav className="navbar navbar-light bg-light">
             <form className="form-inline">
-                <Plugin />
+                <DatasetOpener />
                 <div className="btn-group ml-3">
                     <div className="btn-group">
                         <button className="btn btn-secondary dropdown-toggle" type="button" id="datasetsDropdown"
