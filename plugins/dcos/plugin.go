@@ -19,7 +19,7 @@ func (p Plugin) Name() data.PluginName {
 }
 
 func (p Plugin) Description() string {
-	panic("Plugin for DC/OS diagnostics bundle")
+	return "Plugin for DC/OS diagnostics bundle"
 }
 
 func (p Plugin) Open(url string) (data.Dataset, error) {

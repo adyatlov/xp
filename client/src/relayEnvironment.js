@@ -4,6 +4,14 @@ function fetchQuery(
     operation,
     variables
 ) {
+    // DEBUG:
+    // console.log(operation.text);
+    // console.log(variables);
+    // let debug = JSON.stringify({
+    //     query: operation.text, // GraphQL text from input
+    //     variables,
+    // });
+    // console.log(debug);
     return fetch('http://localhost:7777/graphql', {
         method: 'POST',
         headers: {
@@ -15,6 +23,10 @@ function fetchQuery(
             variables,
         }),
     }).then(response => {
+        // DEBUG:
+        // let tmp = response.json();
+        // tmp.then((val) => console.log(val.data));
+        // return tmp;
         return response.json();
     });
 }

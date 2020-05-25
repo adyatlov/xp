@@ -1,86 +1,137 @@
 import React from 'react';
-import { BrowserRouter as Router, Switch, Route, useLocation} from "react-router-dom";
+import {useLocation} from "react-router-dom";
+import {QueryRenderer} from 'react-relay';
+import graphql from 'babel-plugin-relay/macro';
 
-import TopBar from "./TopBar";
-import ObjectSidePanel from "./ObjectSidePanel";
-import Properties from "./Properties";
-import ChildrenTable from "./ChildrenTable";
-import Breadcrumb from "./Breadcrumb";
-import {QueryRenderer} from "react-relay";
 import environment from "./relayEnvironment";
-import graphql from "babel-plugin-relay/macro";
+import DatasetAdder from "./DatasetAdder";
+// import Properties from "./Properties";
+// import ChildrenTable from "./ChildrenTable";
+// import {ObjectViewLayout} from "./ObjectViewLayout";
 
-export default function App() {
-    return (
-        <Router>
-            <Switch>
-                <Route path="/datasets/:datasetId/:objectId/:childrenTypeName">
-                    <DatasetLayout mainPanel={<ChildrenTable/>}/>
-                </Route>
-                <Route path="/datasets/:datasetId/:objectId">
-                    <DatasetLayout mainPanel={<Properties/>}/>
-                </Route>
-                <Route exact path="/">
-                    <SelectDatasets/>
-                </Route>
-                <Route path="*">
-                    <NoMatch/>
-                </Route>
-            </Switch>
-        </Router>
+const query = graphql`
+    query AppQuery {
+        plugins {
+            name
+            description
+        }
+    }
+`;
+
+export default class App extends React.Component {
+    render() {
+        const {match} = this.props;
+        return(
+            <QueryRenderer
+                environment={environment}
+                query={query}
+                // fetchPolicy={"store-and-network"}
+                render={({error, props}) => {
+                    if (error) {
+                        return (<div>{error.text}</div>);
+                    }
+                    let plugins = null;
+                    if (props) {
+                        plugins = props.plugins
+                    }
+                    if (match.path === "/") {
+                        return (
+                            <>
+                                <TopBar>
+                                    <DatasetAdder/>
+                                </TopBar>
+                                <Test plugins={plugins}/>
+                                <SelectDatasets/>
+                            </>
+                        );
+                    }
+                    return (
+                        <>
+                            <TopBar/>
+                            <NoMatch/>
+                        </>
+                    );
+                }
+                } />
+        );
+    }
+}
+
+function Test(props) {
+    if (!props.plugins) {
+        return <div>Loading...</div>
+    }
+    return(
+    <ul>
+        {props.plugins.map((value, index) => {
+            return(
+                <li key={index}><h5>{value.name}</h5><p>{value.description}</p></li>
+            );
+        })}
+    </ul>
     );
 }
 
-function DatasetLayout(props) {
+function TopBar(props) {
     return (
-        <>
-            <TopBar/>
-            <div id="root" className="container-fluid">
-                <Breadcrumb/>
-                <div className="row">
-                    <div className="col-3"><ObjectSidePanel /></div>
-                    <div className="col-9">{props.mainPanel}</div>
+        <nav className="navbar navbar-light bg-light">
+            <form className="form-inline">
+                {props.children}
+            </form>
+            <span className="navbar-brand">XP</span>
+        </nav>
+    );
+}
+
+function MessageBox(props) {
+    let className = "alert alert-light";
+    if (props.warning) {
+        className = "alert alert-warning";
+    }
+    return(
+        <div id="root" className="container">
+            <div className="row mt-5">
+                <div className="col">
+                    <div className={className} role="alert">
+                        {props.children}
+                    </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 }
 
 function SelectDatasets() {
     return (
-        <>
-            <TopBar/>
-            <div id="root" className="container">
-                <div className="row mt-5">
-                    <div className="col">
-                        <div className="alert alert-light" role="alert">
-                            <h4 className="alert-heading">Welcome to XP!</h4>
-                            <p>Please, select a dataset. If there are no open datasets, or they are not what you need,
-                                open a new one: insert a dataset URL, choose one of the compatible plugins,
-                                and press "Open".</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </>
+        <MessageBox>
+            <h4 className="alert-heading">Welcome to XP!</h4>
+            <p>XP helps you to explore heterogeneous datasets uniformly.</p>
+            <p>Please, select a dataset or open a new one:
+                insert a dataset URL, choose one of the compatible plugins, and press "Open".</p>
+        </MessageBox>
     );
 }
 
 function NoMatch() {
     let location = useLocation();
     return (
-        <>
-            <TopBar/>
-            <div id="root" className="container">
-                <div className="row mt-5">
-                    <div className="col">
-                        <div className="alert alert-warning" role="alert">
-                            <h4 className="alert-heading">Error</h4>
-                            <p>Page <code>{location.pathname}</code> not found.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </>
+        <MessageBox warning>
+            <h4 className="alert-heading">Error</h4>
+            <p>Page <code>{location.pathname}</code> not found.</p>
+        </MessageBox>
     );
 }
+
+// function LoadingSpinner() {
+//    return(
+//             <div style={{position: "fixed", top: "50%", left: "50%",
+//             transform:"translate(-50%, -50%)"}}>
+//                 <h4 className="text-secondary">
+//                     Loading XP...
+//                 </h4>
+//                 <div className="text-center">
+//                     <div className="spinner-grow text-secondary mt-3" style={{width: "2rem", height: "2rem"}} role="status"/>
+//                 </div>
+//             </div>
+//    );
+// }

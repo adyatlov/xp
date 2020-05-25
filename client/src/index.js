@@ -1,12 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {BrowserRouter as Router, Route} from "react-router-dom";
+
 import App from './App';
 
-
-ReactDOM.render(<App />, document.getElementById("root"));
-
 // For debug purposes. Use it instead log.
-console.shallowCloneLog = function(){
+console.myLog = function(){
     let typeString = Function.prototype.call.bind(Object.prototype.toString)
     console.log.apply(console, Array.prototype.map.call(arguments, function(x){
         switch (typeString(x).slice(8, -1)) {
@@ -23,4 +22,16 @@ console.shallowCloneLog = function(){
         }
     }));
 }
+
+ReactDOM.render(
+    <Router>
+        <Route path={[
+            "/o/:datasetId/:objectId/:childrenTypeName",
+            "/o/:datasetId/:objectId",
+            "/"]} component={App}/>
+    </Router>,
+    document.getElementById('root')
+);
+
+
 
