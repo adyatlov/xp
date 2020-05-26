@@ -11,9 +11,11 @@ import DatasetAdder from "./DatasetAdder";
 
 const query = graphql`
     query AppQuery {
-        plugins {
-            name
-            description
+        datasets {
+            id
+            root {
+                name
+            }
         }
     }
 `;
@@ -25,14 +27,14 @@ export default class App extends React.Component {
             <QueryRenderer
                 environment={environment}
                 query={query}
-                // fetchPolicy={"store-and-network"}
+                fetchPolicy={"store-and-network"}
                 render={({error, props}) => {
                     if (error) {
                         return (<div>{error.text}</div>);
                     }
-                    let plugins = null;
+                    let datasets = null;
                     if (props) {
-                        plugins = props.plugins
+                        datasets = props.datasets;
                     }
                     if (match.path === "/") {
                         return (
@@ -40,7 +42,7 @@ export default class App extends React.Component {
                                 <TopBar>
                                     <DatasetAdder/>
                                 </TopBar>
-                                <Test plugins={plugins}/>
+                                <Test datasets={datasets}/>
                                 <SelectDatasets/>
                             </>
                         );
@@ -58,14 +60,14 @@ export default class App extends React.Component {
 }
 
 function Test(props) {
-    if (!props.plugins) {
+    if (!props.datasets) {
         return <div>Loading...</div>
     }
     return(
     <ul>
-        {props.plugins.map((value, index) => {
+        {props.datasets.map((value, index) => {
             return(
-                <li key={index}><h5>{value.name}</h5><p>{value.description}</p></li>
+                <li key={index}><h5>{value.id}:{value.root.name}</h5></li>
             );
         })}
     </ul>

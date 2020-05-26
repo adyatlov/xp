@@ -1,5 +1,5 @@
 import React from "react";
-import {QueryRenderer} from 'react-relay';
+import {QueryRenderer, commitMutation} from 'react-relay';
 import graphql from 'babel-plugin-relay/macro';
 import environment from "./relayEnvironment";
 
@@ -12,6 +12,36 @@ const query = graphql`
     }
 `;
 
+const mutation = graphql`
+    mutation DatasetAdderAddDatasetMutation($plugin: String!, $url: String!) {
+        addDataset(plugin: $plugin, url: $url) {
+            id
+            root {
+                type {
+                    name
+                }
+                name
+            }
+        }
+    }
+`
+function addDataset(environment, pluginName, url) {
+    console.log(pluginName, url);
+    return commitMutation(
+        environment,
+        {
+            mutation,
+            variables: {
+                    plugin: pluginName,
+                    url: url
+            },
+            onError: (error) => {
+                console.error(error.message);
+            }
+        }
+    )
+}
+
 export default class DatasetAdderQuery extends React.Component{
     constructor(props) {
         super(props);
@@ -21,6 +51,7 @@ export default class DatasetAdderQuery extends React.Component{
         };
         this.handleURLChange = this.handleURLChange.bind(this);
         this.handlePluginNameChange = this.handlePluginNameChange.bind(this);
+        this.handleAddDataset = this.handleAddDataset.bind(this);
     }
 
     handleURLChange(url) {
@@ -28,7 +59,13 @@ export default class DatasetAdderQuery extends React.Component{
     }
 
     handlePluginNameChange(pluginName) {
+        console.log(pluginName)
         this.setState( {pluginName: pluginName})
+    }
+
+    handleAddDataset() {
+        console.log(this.state.pluginName, this.state.url);
+        addDataset(environment, this.state.pluginName, this.state.url);
     }
 
     render() {
@@ -39,7 +76,7 @@ export default class DatasetAdderQuery extends React.Component{
                 environment={environment}
                 query={query}
                 variables={{url}}
-                // fetchPolicy={"store-and-network"}
+                fetchPolicy={"store-and-network"}
                 render={({error, props}) => {
                     if (error) {
                         console.log(error.text);
@@ -56,7 +93,8 @@ export default class DatasetAdderQuery extends React.Component{
                                       pluginName={pluginName}
                                       plugins={plugins}
                                       onURLChange={this.handleURLChange}
-                                      onPluginNameChange={this.handlePluginNameChange}/>
+                                      onPluginNameChange={this.handlePluginNameChange}
+                                      onAddDataset={this.handleAddDataset}/>
                     );
                 }}/>
         );
@@ -65,7 +103,7 @@ export default class DatasetAdderQuery extends React.Component{
 
 
 function DatasetAdder (props) {
-        const {url, plugins, onURLChange, onPluginNameChange} = props
+        const {url, plugins, onURLChange, onPluginNameChange, onAddDataset} = props
         let {pluginName} = props
         if (!plugins) {
             return (
@@ -93,7 +131,7 @@ function DatasetAdder (props) {
             <InputGroup>
                 <UrlInput url={url} onChange={onURLChange}/>
                 <PluginSelector pluginName={pluginName} plugins={plugins} onChange={onPluginNameChange}/>
-                <OpenButton disabled={openDisabled}/>
+                <OpenButton disabled={openDisabled} onClick={onAddDataset}/>
             </InputGroup>
         );
 }
@@ -139,9 +177,11 @@ function PluginSelector(props) {
 }
 
 function OpenButton(props) {
+    const {onClick} = props;
     return(
         <div className="input-group-append">
-            <button disabled={props.disabled} type="button" className="btn btn-secondary text-nowrap">Open</button>
+            <button disabled={props.disabled}  onClick={onClick}
+                    type="button" className="btn btn-secondary text-nowrap">Open</button>
         </div>
     );
 }
@@ -164,33 +204,4 @@ function Message(props) {
         </div>
     );
 }
-
-// const mutation = graphql`
-//     mutation DatasetOpenerAddDatasetMutation($plugin: String!, $url: String!) {
-//         addDataset(plugin: $plugin, url: $url) {
-//             id
-//             root {
-//                 type {
-//                     name
-//                 }
-//                 name
-//             }
-//         }
-//     }
-// `
-
-// function addDataset(environment, url, pluginName) {
-//     return commitMutation(
-//         environment,
-//         {
-//             mutation,
-//             variables: {
-//                 input: {url, pluginName}
-//             },
-//             onError: (error) => {
-//                 console.error(error.message);
-//             }
-//         }
-//     )
-// }
 
