@@ -3,6 +3,7 @@ package gql
 type Schema struct {
 	Query
 	Mutation
+	Subscription
 	datasets *datasetRegistry
 }
 
@@ -10,7 +11,9 @@ func NewSchema() *Schema {
 	schema := &Schema{}
 	schema.datasets = NewDatasetRegistry()
 	schema.Query.datasets = schema.datasets
+	schema.Subscription = newSubscription(schema.datasets)
 	schema.Mutation.datasets = schema.datasets
+	schema.Mutation.onDatasetUpdate = schema.Subscription.DatasetsUpdated
 	return schema
 }
 
@@ -28,22 +31,27 @@ enum PropertyValueType {
 schema {
     query: Query
     mutation: Mutation
+    subscription: Subscription
 }
 
 type Query {
     object(datasetId: ID!, id: ID!): Object!
-	datasets(Ids: [ID!]): [Dataset!]!
-	plugins(url: String): [Plugin!]!
+    datasets(Ids: [ID!]): [Dataset!]!
+    plugins(url: String): [Plugin!]!
 }
 
 type Mutation {
-	addDataset(plugin: String!, url: String!): Dataset!
-	removeDataset(id: String!): Boolean!
+    addDataset(plugin: String!, url: String!): Dataset!
+    removeDataset(id: String!): Boolean!
+}
+
+type Subscription {
+    datasetsChanged: [Dataset!]!
 }
 
 type Object {
     type:                           ObjectType!
-	id:								ID!
+    id:								ID!
     name:                           String!
     children(typeNames: [String!]): [ObjectGroup!]!
     properties(typeNames: [String!]):  [Property!]!
@@ -75,12 +83,12 @@ type PropertyType {
 }
 
 type Dataset {
-	id:   ID!
+    id:   ID!
     root: Object!
 }
 
 type Plugin {
-	name: String!
-	description: String!
+    name: String!
+    description: String!
 }
 `

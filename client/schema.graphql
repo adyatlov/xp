@@ -11,6 +11,7 @@ enum PropertyValueType {
 schema {
     query: Query
     mutation: Mutation
+    subscription: Subscription
 }
 
 type Query {
@@ -22,6 +23,10 @@ type Query {
 type Mutation {
     addDataset(plugin: String!, url: String!): Dataset!
     removeDataset(id: String!): Boolean!
+}
+
+type Subscription {
+    datasetsChanged: [Dataset!]!
 }
 
 type Object {

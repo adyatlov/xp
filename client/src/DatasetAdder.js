@@ -17,9 +17,6 @@ const mutation = graphql`
         addDataset(plugin: $plugin, url: $url) {
             id
             root {
-                type {
-                    name
-                }
                 name
             }
         }
@@ -37,7 +34,7 @@ function addDataset(environment, pluginName, url) {
             },
             onError: (error) => {
                 console.error(error.message);
-            }
+            },
         }
     )
 }
@@ -47,10 +44,8 @@ export default class DatasetAdderQuery extends React.Component{
         super(props);
         this.state = {
             url: "",
-            pluginName: null
         };
         this.handleURLChange = this.handleURLChange.bind(this);
-        this.handlePluginNameChange = this.handlePluginNameChange.bind(this);
         this.handleAddDataset = this.handleAddDataset.bind(this);
     }
 
@@ -58,14 +53,8 @@ export default class DatasetAdderQuery extends React.Component{
         this.setState({url: url})
     }
 
-    handlePluginNameChange(pluginName) {
-        console.log(pluginName)
-        this.setState( {pluginName: pluginName})
-    }
-
-    handleAddDataset() {
-        console.log(this.state.pluginName, this.state.url);
-        addDataset(environment, this.state.pluginName, this.state.url);
+    handleAddDataset(pluginName) {
+        addDataset(environment, pluginName, this.state.url);
     }
 
     render() {
@@ -93,7 +82,6 @@ export default class DatasetAdderQuery extends React.Component{
                                       pluginName={pluginName}
                                       plugins={plugins}
                                       onURLChange={this.handleURLChange}
-                                      onPluginNameChange={this.handlePluginNameChange}
                                       onAddDataset={this.handleAddDataset}/>
                     );
                 }}/>
@@ -101,39 +89,38 @@ export default class DatasetAdderQuery extends React.Component{
     }
 }
 
-
 function DatasetAdder (props) {
-        const {url, plugins, onURLChange, onPluginNameChange, onAddDataset} = props
-        let {pluginName} = props
-        if (!plugins) {
-            return (
-                <InputGroup>
-                    <UrlInput url={url} onChange={onURLChange}/>
-                    <Message>
-                        <span className="spinner-grow spinner-grow-sm mr-2" role="status" aria-hidden="true"/>
-                        Loading plugins...
-                    </Message>
-                    <OpenButton disabled/>
-                </InputGroup>
-            );
-        }
-        if (plugins.length === 0) {
-            return (
-                <InputGroup>
-                    <UrlInput url={url} onChange={onURLChange}/>
-                    <Message>No compatible plugins found</Message>
-                    <OpenButton disabled/>
-                </InputGroup>
-            );
-        }
-        const openDisabled = (url === "" || plugins.length === 0);
+    const {url, plugins, onURLChange, onPluginNameChange, onAddDataset} = props
+    let {pluginName} = props
+    if (!plugins) {
         return (
             <InputGroup>
                 <UrlInput url={url} onChange={onURLChange}/>
-                <PluginSelector pluginName={pluginName} plugins={plugins} onChange={onPluginNameChange}/>
-                <OpenButton disabled={openDisabled} onClick={onAddDataset}/>
+                <Message>
+                    <span className="spinner-grow spinner-grow-sm mr-2" role="status" aria-hidden="true"/>
+                    Loading plugins...
+                </Message>
+                <OpenButton disabled/>
             </InputGroup>
         );
+    }
+    if (plugins.length === 0) {
+        return (
+            <InputGroup>
+                <UrlInput url={url} onChange={onURLChange}/>
+                <Message>No compatible plugins found</Message>
+                <OpenButton disabled/>
+            </InputGroup>
+        );
+    }
+    const openDisabled = (url === "" || plugins.length === 0);
+    return (
+        <InputGroup>
+            <UrlInput url={url} onChange={onURLChange}/>
+            <PluginSelector pluginName={pluginName} plugins={plugins} onChange={onPluginNameChange}/>
+            <OpenButton pluginName={pluginName} onAddDataset={onAddDataset} disabled={openDisabled}/>
+        </InputGroup>
+    );
 }
 
 function UrlInput(props) {
@@ -177,11 +164,13 @@ function PluginSelector(props) {
 }
 
 function OpenButton(props) {
-    const {onClick} = props;
+    const onClick = ()=> {
+        props.onAddDataset(props.pluginName);
+    }
     return(
         <div className="input-group-append">
-            <button disabled={props.disabled}  onClick={onClick}
-                    type="button" className="btn btn-secondary text-nowrap">Open</button>
+            <button onClick={onClick}
+                    type="button" disabled={props.disabled} className="btn btn-secondary text-nowrap">Open</button>
         </div>
     );
 }

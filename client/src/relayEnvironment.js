@@ -1,5 +1,6 @@
 import {Environment, Network, RecordSource, Store} from "relay-runtime";
-
+import {SubscriptionClient} from "subscriptions-transport-ws";
+const hostPath = window.location.hostname+':7777/graphql';
 function fetchQuery(
     operation,
     variables
@@ -12,7 +13,7 @@ function fetchQuery(
     //     variables,
     // });
     // console.log(debug);
-    return fetch('http://localhost:7777/graphql', {
+    return fetch("http://"+hostPath, {
         method: 'POST',
         headers: {
             // Add authentication and other headers here
@@ -31,7 +32,15 @@ function fetchQuery(
     });
 }
 
-const network = Network.create(fetchQuery);
+function subscribeFunction(request, variables) {
+    const query = request.text;
+    const subscriptionClient = new SubscriptionClient('ws://'+hostPath, {reconnect: true});
+    const client = subscriptionClient.request({query, variables});
+    return client;
+}
+
+const network = Network.create(fetchQuery, subscribeFunction);
+// const network = Network.create(fetchQuery);
 const store = new Store(new RecordSource(), null);
 
 const environment = new Environment({

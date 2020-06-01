@@ -3,7 +3,8 @@ package gql
 import "github.com/adyatlov/xp/data"
 
 type Mutation struct {
-	datasets *datasetRegistry
+	datasets        *datasetRegistry
+	onDatasetUpdate func()
 }
 
 func (m *Mutation) AddDataset(args struct {
@@ -21,6 +22,7 @@ func (m *Mutation) AddDataset(args struct {
 	if err := m.datasets.Add(dataset); err != nil {
 		return nil, err
 	}
+	m.onDatasetUpdate()
 	return &datasetResolver{dataset}, nil
 }
 
@@ -30,5 +32,6 @@ func (m *Mutation) RemoveDataset(args struct {
 	if err := m.datasets.Remove(data.DatasetId(args.Id)); err != nil {
 		return false, err
 	}
+	m.onDatasetUpdate()
 	return true, nil
 }

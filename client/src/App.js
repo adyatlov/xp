@@ -1,6 +1,6 @@
 import React from 'react';
 import {useLocation} from "react-router-dom";
-import {QueryRenderer} from 'react-relay';
+import {QueryRenderer, requestSubscription} from 'react-relay';
 import graphql from 'babel-plugin-relay/macro';
 
 import environment from "./relayEnvironment";
@@ -20,6 +20,31 @@ const query = graphql`
     }
 `;
 
+const subscription = graphql`
+    subscription AppSubscription {
+        datasetsChanged {
+            id
+            root {
+                name
+            }
+        }
+    }
+`;
+
+requestSubscription(
+    environment,
+    {
+        subscription: subscription,
+        variables: {},
+        onCompleted: () => console.log("Server disconnected the subscription."),
+        onError: error => console.error(error),
+        updater: (store, data) => {
+            let newDatasets = store.getPluralRootField("datasetsChanged")
+            store.getRoot().setLinkedRecords(newDatasets, "datasets");
+        },
+    }
+);
+
 export default class App extends React.Component {
     render() {
         const {match} = this.props;
@@ -27,7 +52,7 @@ export default class App extends React.Component {
             <QueryRenderer
                 environment={environment}
                 query={query}
-                fetchPolicy={"store-and-network"}
+                // fetchPolicy={"store-and-network"}
                 render={({error, props}) => {
                     if (error) {
                         return (<div>{error.text}</div>);

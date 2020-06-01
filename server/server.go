@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
+	"github.com/graph-gophers/graphql-transport-ws/graphqlws"
 	"github.com/rs/cors"
 )
 
@@ -30,7 +31,8 @@ func (s *Server) Serve() error {
 	schema := graphql.MustParseSchema(gql.SchemaString, s.schema)
 	r := mux.NewRouter()
 	r.PathPrefix("/client").Handler(http.StripPrefix("/client", http.FileServer(s.box)))
-	r.Handle("/graphql", &DebugHandler{&relay.Handler{Schema: schema}})
+	gqlHandler := &DebugHandler{graphqlws.NewHandlerFunc(schema, &relay.Handler{Schema: schema})}
+	r.Handle("/graphql", gqlHandler)
 	r.HandleFunc("/", s.redirectToClient)
 	corsHandler := cors.Default().Handler(r)
 	return http.ListenAndServe(fmt.Sprintf("%v:%v", "localhost", "7777"), corsHandler)
