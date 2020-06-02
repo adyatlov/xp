@@ -7,13 +7,28 @@ function DatasetList(props) {
         return <div>Loading dataset list...</div>
     }
     return(
-        <ul className="list-group">
+        <table className="table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">Type</th>
+                <th scope="col">Name</th>
+                <th scope="col">Plugin</th>
+                <th scope="col">URL</th>
+            </tr>
+            </thead>
+            <tbody>
             {props.datasets.map((value, index) => {
                 return(
-                    <li key={index} className="list-group-item">{value.root.type.name}: {value.root.name}</li>
+                    <tr key={index}>
+                        <td>{value.root.type.name}</td>
+                        <td>{value.root.name}</td>
+                        <td>Plugin name goes here</td>
+                        <td>http://url.goes.here/</td>
+                    </tr>
                 );
             })}
-        </ul>
+            </tbody>
+        </table>
     );
 }
 

@@ -24,6 +24,9 @@ const subscription = graphql`
             id
             root {
                 name
+                type {
+                    name
+                }
             }
         }
     }
@@ -53,32 +56,39 @@ export default class App extends React.Component {
                 // fetchPolicy={"store-and-network"}
                 render={({error, props}) => {
                     if (error) {
-                        return (<div>{error.text}</div>);
+                        return(
+                            <Alert warning>
+                                <h4 className="alert-heading">Error</h4>
+                                <p>{error.text}</p>
+                            </Alert>
+                        );
                     }
-                    let datasets = null;
-                    if (props) {
-                        datasets = props.datasets;
+                    if (!props) {
+                        return (
+                            <LoadingSpinner/>
+                        );
                     }
+                    let datasets = props.datasets;
                     if (match.path === "/") {
                         return (
-                            <>
-                                <TopBar>
-                                    <DatasetAdder/>
-                                </TopBar>
-                                <SelectDatasets/>
+                            <div id="root" className="container text-secondary">
+                                <h4 className="mt-5 mb-4">Welcome to XP,
+                                    <small> the explorer of heterogeneous datasets</small></h4>
+                                <p>Please, open a new dataset:</p>
+                                <DatasetAdder/>
+                                {datasets.length > 0 &&  <p className="mt-3">or choose from the existing ones:</p>}
                                 <DatasetList datasets={datasets}/>
-                            </>
+                            </div>
                         );
                     }
                     return (
                         <>
                             <TopBar/>
-                            <NoMatch/>
+                            <AlertNoMatch/>
                         </>
                     );
-                }
-                } />
-        );
+                }} />
+    );
     }
 }
 
@@ -93,55 +103,38 @@ function TopBar(props) {
     );
 }
 
-function MessageBox(props) {
+function Alert(props) {
     let className = "alert alert-light";
     if (props.warning) {
         className = "alert alert-warning";
     }
     return(
-        <div id="root" className="container">
-            <div className="row mt-5">
-                <div className="col">
-                    <div className={className} role="alert">
-                        {props.children}
-                    </div>
-                </div>
-            </div>
+        <div className={className} role="alert">
+            {props.children}
         </div>
     );
 }
 
-function SelectDatasets() {
-    return (
-        <MessageBox>
-            <h4 className="alert-heading">Welcome to XP!</h4>
-            <p>XP helps you to explore heterogeneous datasets uniformly.</p>
-            <p>Please, select a dataset or open a new one:
-                insert a dataset URL, choose one of the compatible plugins, and press "Open".</p>
-        </MessageBox>
-    );
-}
-
-function NoMatch() {
+function AlertNoMatch() {
     let location = useLocation();
     return (
-        <MessageBox warning>
+        <Alert warning>
             <h4 className="alert-heading">Error</h4>
             <p>Page <code>{location.pathname}</code> not found.</p>
-        </MessageBox>
+        </Alert>
     );
 }
 
-// function LoadingSpinner() {
-//    return(
-//             <div style={{position: "fixed", top: "50%", left: "50%",
-//             transform:"translate(-50%, -50%)"}}>
-//                 <h4 className="text-secondary">
-//                     Loading XP...
-//                 </h4>
-//                 <div className="text-center">
-//                     <div className="spinner-grow text-secondary mt-3" style={{width: "2rem", height: "2rem"}} role="status"/>
-//                 </div>
-//             </div>
-//    );
-// }
+function LoadingSpinner() {
+    return(
+        <div style={{position: "fixed", top: "50%", left: "50%",
+            transform:"translate(-50%, -50%)"}}>
+            <h4 className="text-secondary">
+                Loading XP...
+            </h4>
+            <div className="text-center">
+                <div className="spinner-grow text-secondary mt-3" style={{width: "2rem", height: "2rem"}} role="status"/>
+            </div>
+        </div>
+    );
+}
