@@ -16,21 +16,17 @@ const mutation = graphql`
     mutation DatasetAdderAddDatasetMutation($plugin: String!, $url: String!) {
         addDataset(plugin: $plugin, url: $url) {
             id
-            root {
-                name
-            }
         }
     }
 `
 function addDataset(environment, pluginName, url) {
-    console.log(pluginName, url);
     return commitMutation(
         environment,
         {
             mutation,
             variables: {
-                    plugin: pluginName,
-                    url: url
+                plugin: pluginName,
+                url: url
             },
             onError: (error) => {
                 console.error(error.message);
@@ -46,20 +42,14 @@ export default class DatasetAdderQuery extends React.Component{
             url: "",
         };
         this.handleURLChange = this.handleURLChange.bind(this);
-        this.handleAddDataset = this.handleAddDataset.bind(this);
     }
 
     handleURLChange(url) {
         this.setState({url: url})
     }
 
-    handleAddDataset(pluginName) {
-        addDataset(environment, pluginName, this.state.url);
-    }
-
     render() {
         const {url} = this.state;
-        let {pluginName} = this.state;
         return(
             <QueryRenderer
                 environment={environment}
@@ -68,59 +58,80 @@ export default class DatasetAdderQuery extends React.Component{
                 fetchPolicy={"store-and-network"}
                 render={({error, props}) => {
                     if (error) {
-                        console.log(error.text);
+                        console.error(error.text);
                     }
                     let plugins = null
                     if (props) {
                         plugins = props.plugins;
-                        if (plugins.length === 1) {
-                            pluginName = plugins[0].name;
-                        }
                     }
                     return (
-                        <DatasetAdder url={url}
-                                      pluginName={pluginName}
-                                      plugins={plugins}
-                                      onURLChange={this.handleURLChange}
-                                      onAddDataset={this.handleAddDataset}/>
+                        <DatasetAdder plugins={plugins} onURLChange={this.handleURLChange}/>
                     );
                 }}/>
         );
     }
 }
 
-function DatasetAdder (props) {
-    const {url, plugins, onURLChange, onPluginNameChange, onAddDataset} = props
-    let {pluginName} = props
-    if (!plugins) {
-        return (
-            <InputGroup>
-                <UrlInput url={url} onChange={onURLChange}/>
+class DatasetAdder extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            url: "",
+            pluginName: null,
+        }
+        this.handleURLChange = this.handleURLChange.bind(this);
+        this.handlePluginNameChange = this.handlePluginNameChange.bind(this);
+        this.handleAddDataset = this.handleAddDataset.bind(this);
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (this.props.plugins &&
+            this.props.plugins.length === 1 &&
+            this.state.pluginName !== this.props.plugins[0].name) {
+            this.setState({pluginName: this.props.plugins[0].name})
+        }
+    }
+
+    handleURLChange(url) {
+        this.setState({url: url});
+        this.props.onURLChange(url);
+    }
+
+    handlePluginNameChange(pluginName) {
+        this.setState({pluginName: pluginName});
+    }
+
+    handleAddDataset() {
+        addDataset(environment, this.state.pluginName, this.state.url);
+    }
+
+    render() {
+        const {plugins} = this.props;
+        const {url, pluginName} = this.state;
+        const openDisabled = (url === "" || !plugins || plugins.length === 0);
+        let selector = (
+            <PluginSelector pluginName={pluginName} plugins={plugins} onChange={this.handlePluginNameChange}/>
+        );
+        if (!plugins) {
+            selector = (
                 <Message>
                     <span className="spinner-grow spinner-grow-sm mr-2" role="status" aria-hidden="true"/>
                     Loading plugins...
                 </Message>
-                <OpenButton disabled/>
-            </InputGroup>
-        );
-    }
-    if (plugins.length === 0) {
+            );
+        } else if (plugins.length === 0) {
+            selector = (
+                <Message>No compatible plugins found</Message>
+            );
+        }
         return (
             <InputGroup>
-                <UrlInput url={url} onChange={onURLChange}/>
-                <Message>No compatible plugins found</Message>
-                <OpenButton disabled/>
+                <UrlInput url={url} onChange={this.handleURLChange}/>
+                {selector}
+                <OpenButton onAddDataset={this.handleAddDataset} disabled={openDisabled}/>
             </InputGroup>
         );
     }
-    const openDisabled = (url === "" || plugins.length === 0);
-    return (
-        <InputGroup>
-            <UrlInput url={url} onChange={onURLChange}/>
-            <PluginSelector pluginName={pluginName} plugins={plugins} onChange={onPluginNameChange}/>
-            <OpenButton pluginName={pluginName} onAddDataset={onAddDataset} disabled={openDisabled}/>
-        </InputGroup>
-    );
 }
 
 function UrlInput(props) {
@@ -164,13 +175,11 @@ function PluginSelector(props) {
 }
 
 function OpenButton(props) {
-    const onClick = ()=> {
-        props.onAddDataset(props.pluginName);
-    }
     return(
         <div className="input-group-append">
-            <button onClick={onClick}
-                    type="button" disabled={props.disabled} className="btn btn-secondary text-nowrap">Open</button>
+            <button onClick={props.onAddDataset}
+                    type="button" disabled={props.disabled}
+                    className="btn btn-secondary text-nowrap">Open</button>
         </div>
     );
 }

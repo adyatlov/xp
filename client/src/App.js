@@ -5,6 +5,7 @@ import graphql from 'babel-plugin-relay/macro';
 
 import environment from "./relayEnvironment";
 import DatasetAdder from "./DatasetAdder";
+import DatasetList from "./DatasetList";
 // import Properties from "./Properties";
 // import ChildrenTable from "./ChildrenTable";
 // import {ObjectViewLayout} from "./ObjectViewLayout";
@@ -12,10 +13,7 @@ import DatasetAdder from "./DatasetAdder";
 const query = graphql`
     query AppQuery {
         datasets {
-            id
-            root {
-                name
-            }
+            ...DatasetList_datasets
         }
     }
 `;
@@ -67,8 +65,8 @@ export default class App extends React.Component {
                                 <TopBar>
                                     <DatasetAdder/>
                                 </TopBar>
-                                <Test datasets={datasets}/>
                                 <SelectDatasets/>
+                                <DatasetList datasets={datasets}/>
                             </>
                         );
                     }
@@ -82,21 +80,6 @@ export default class App extends React.Component {
                 } />
         );
     }
-}
-
-function Test(props) {
-    if (!props.datasets) {
-        return <div>Loading...</div>
-    }
-    return(
-    <ul>
-        {props.datasets.map((value, index) => {
-            return(
-                <li key={index}><h5>{value.id}:{value.root.name}</h5></li>
-            );
-        })}
-    </ul>
-    );
 }
 
 function TopBar(props) {
