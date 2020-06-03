@@ -1,9 +1,11 @@
 package gql
 
-import "github.com/adyatlov/xp/data"
+import (
+	"github.com/adyatlov/xp/plugin"
+)
 
 type pluginResolver struct {
-	plugin data.Plugin
+	plugin plugin.Plugin
 }
 
 func (r *pluginResolver) Name() string {

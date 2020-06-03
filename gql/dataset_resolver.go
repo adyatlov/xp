@@ -1,12 +1,13 @@
 package gql
 
 import (
-	"github.com/adyatlov/xp/data"
+	"strconv"
+
 	"github.com/graph-gophers/graphql-go"
 )
 
 type datasetResolver struct {
-	dataset data.Dataset
+	dataset DatasetInfo
 }
 
 func (r *datasetResolver) Id() graphql.ID {
@@ -19,4 +20,16 @@ func (r *datasetResolver) Root() (*objectResolver, error) {
 		return nil, err
 	}
 	return &objectResolver{root}, nil
+}
+
+func (r *datasetResolver) Plugin() *pluginResolver {
+	return &pluginResolver{r.dataset.Plugin}
+}
+
+func (r *datasetResolver) URL() string {
+	return r.dataset.Url
+}
+
+func (r *datasetResolver) Added() string {
+	return strconv.FormatInt(r.dataset.Added.Unix(), 10)
 }

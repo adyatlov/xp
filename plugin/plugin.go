@@ -1,12 +1,21 @@
-package data
+package plugin
 
 import (
 	"fmt"
 	"sync"
+
+	"github.com/adyatlov/xp/data"
 )
 
-var plugins = make(map[PluginName]Plugin)
+var plugins = make(map[data.PluginName]Plugin)
 var pluginsMu = &sync.RWMutex{}
+
+type Plugin interface {
+	Name() data.PluginName
+	Description() string
+	Open(url string) (data.Dataset, error)
+	Compatible(url string) (bool, error)
+}
 
 func RegisterPlugin(plugin Plugin) {
 	pluginsMu.Lock()
@@ -20,7 +29,7 @@ func RegisterPlugin(plugin Plugin) {
 	plugins[plugin.Name()] = plugin
 }
 
-func GetPlugin(name PluginName) (Plugin, error) {
+func GetPlugin(name data.PluginName) (Plugin, error) {
 	pluginsMu.RLock()
 	plugin, ok := plugins[name]
 	pluginsMu.RUnlock()

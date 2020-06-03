@@ -4,11 +4,12 @@ import (
 	"time"
 
 	"github.com/adyatlov/xp/data"
+	"github.com/adyatlov/xp/plugin"
 )
 
 func init() {
-	plugin := &Plugin{}
-	data.RegisterPlugin(plugin)
+	p := &Plugin{}
+	plugin.RegisterPlugin(p)
 }
 
 type Plugin struct {

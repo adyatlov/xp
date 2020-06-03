@@ -3,23 +3,32 @@ package gql
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/adyatlov/xp/data"
+	"github.com/adyatlov/xp/plugin"
 )
 
+type DatasetInfo struct {
+	data.Dataset
+	Plugin plugin.Plugin
+	Url    string
+	Added  time.Time
+}
+
 type datasetRegistry struct {
-	datasets   map[data.DatasetId]data.Dataset
+	datasets   map[data.DatasetId]DatasetInfo
 	datasetsMu *sync.RWMutex
 }
 
 func NewDatasetRegistry() *datasetRegistry {
 	registry := &datasetRegistry{}
-	registry.datasets = make(map[data.DatasetId]data.Dataset)
+	registry.datasets = make(map[data.DatasetId]DatasetInfo)
 	registry.datasetsMu = &sync.RWMutex{}
 	return registry
 }
 
-func (r *datasetRegistry) Add(dataset data.Dataset) error {
+func (r *datasetRegistry) Add(dataset DatasetInfo) error {
 	r.datasetsMu.Lock()
 	defer r.datasetsMu.Unlock()
 	if _, ok := r.datasets[dataset.Id()]; ok {
@@ -29,19 +38,19 @@ func (r *datasetRegistry) Add(dataset data.Dataset) error {
 	return nil
 }
 
-func (r *datasetRegistry) Get(id data.DatasetId) (data.Dataset, error) {
+func (r *datasetRegistry) Get(id data.DatasetId) (DatasetInfo, error) {
 	r.datasetsMu.RLock()
 	defer r.datasetsMu.RUnlock()
 	if dataset, ok := r.datasets[id]; ok {
 		return dataset, nil
 	}
-	return nil, fmt.Errorf("dataset \"%v\" not found", id)
+	return DatasetInfo{}, fmt.Errorf("dataset \"%v\" not found", id)
 }
 
-func (r *datasetRegistry) GetAll() []data.Dataset {
+func (r *datasetRegistry) GetAll() []DatasetInfo {
 	r.datasetsMu.RLock()
 	defer r.datasetsMu.RUnlock()
-	res := make([]data.Dataset, 0, len(r.datasets))
+	res := make([]DatasetInfo, 0, len(r.datasets))
 	for _, dataset := range r.datasets {
 		res = append(res, dataset)
 	}

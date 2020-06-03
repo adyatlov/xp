@@ -61,10 +61,3 @@ type Dataset interface {
 	Root() (Object, error)
 	Find(t ObjectTypeName, n ObjectId) (Object, error)
 }
-
-type Plugin interface {
-	Name() PluginName
-	Description() string
-	Open(url string) (Dataset, error)
-	Compatible(url string) (bool, error)
-}

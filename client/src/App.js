@@ -22,6 +22,11 @@ const subscription = graphql`
     subscription AppSubscription {
         datasetsChanged {
             id
+            plugin {
+                name
+            }
+            url
+            added
             root {
                 name
                 type {
@@ -91,7 +96,7 @@ export default class App extends React.Component {
                         </>
                     );
                 }} />
-    );
+        );
     }
 }
 

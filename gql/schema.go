@@ -42,7 +42,7 @@ type Query {
 
 type Mutation {
     addDataset(plugin: String!, url: String!): Dataset!
-    removeDataset(id: String!): Boolean!
+    removeDataset(id: ID!): Boolean!
 }
 
 type Subscription {
@@ -85,6 +85,9 @@ type PropertyType {
 type Dataset {
     id:   ID!
     root: Object!
+    plugin: Plugin!
+    url: String!
+    added: String!
 }
 
 type Plugin {

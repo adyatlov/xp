@@ -1,6 +1,11 @@
 package gql
 
-import "github.com/adyatlov/xp/data"
+import (
+	"time"
+
+	"github.com/adyatlov/xp/data"
+	"github.com/adyatlov/xp/plugin"
+)
 
 type Mutation struct {
 	datasets        *datasetRegistry
@@ -11,7 +16,7 @@ func (m *Mutation) AddDataset(args struct {
 	Plugin string
 	Url    string
 }) (*datasetResolver, error) {
-	plugin, err := data.GetPlugin(data.PluginName(args.Plugin))
+	plugin, err := plugin.GetPlugin(data.PluginName(args.Plugin))
 	if err != nil {
 		return nil, err
 	}
@@ -19,11 +24,17 @@ func (m *Mutation) AddDataset(args struct {
 	if err != nil {
 		return nil, err
 	}
-	if err := m.datasets.Add(dataset); err != nil {
+	datasetInfo := DatasetInfo{
+		Dataset: dataset,
+		Plugin:  plugin,
+		Url:     args.Url,
+		Added:   time.Now(),
+	}
+	if err := m.datasets.Add(datasetInfo); err != nil {
 		return nil, err
 	}
 	m.onDatasetUpdate()
-	return &datasetResolver{dataset}, nil
+	return &datasetResolver{datasetInfo}, nil
 }
 
 func (m *Mutation) RemoveDataset(args struct {

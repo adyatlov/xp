@@ -124,7 +124,7 @@ class DatasetAdder extends React.Component {
     render() {
         const {plugins} = this.props;
         const {url, pluginName} = this.state;
-        const openDisabled = (url === "" || !plugins || plugins.length === 0);
+        const openDisabled = (url === "" || !plugins || plugins.length === 0 || !pluginName);
         return (
             <div className="btn-toolbar d-flex" role="toolbar" aria-label="Toolbar for opening datasets">
                 <div className="input-group flex-grow-1">
