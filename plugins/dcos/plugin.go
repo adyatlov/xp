@@ -28,5 +28,8 @@ func (p Plugin) Open(url string) (data.Dataset, error) {
 
 func (p Plugin) Compatible(url string) (bool, error) {
 	time.Sleep(1 * time.Second)
+	if url == "example.com/?minEmployee=10&maxEmployee=100&nDivision=11" {
+		return true, nil
+	}
 	return false, nil
 }

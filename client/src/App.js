@@ -76,8 +76,11 @@ export default class App extends React.Component {
                                     <small> the explorer of heterogeneous datasets</small></h4>
                                 <p>Please, open a new dataset:</p>
                                 <DatasetAdder/>
-                                {datasets.length > 0 &&  <p className="mt-3">or choose from the existing ones:</p>}
-                                <DatasetList datasets={datasets}/>
+                                {datasets.length > 0 &&
+                                <>
+                                    <p className="mt-3">or choose the existing one:</p>
+                                    <DatasetList datasets={datasets}/>
+                                </>}
                             </div>
                         );
                     }

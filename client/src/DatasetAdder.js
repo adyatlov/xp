@@ -85,10 +85,26 @@ class DatasetAdder extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (this.props.plugins &&
-            this.props.plugins.length === 1 &&
-            this.state.pluginName !== this.props.plugins[0].name) {
-            this.setState({pluginName: this.props.plugins[0].name})
+        const plugins = this.props.plugins;
+        const pluginName = this.state.pluginName;
+        // Do nothing when the plugins array is not set on loading.
+        if (!plugins) {
+            return;
+        }
+        // If only one compatible plugin was found then choose it straightaway.
+        if (plugins.length === 1 && pluginName !== plugins[0].name) {
+            this.setState({pluginName: plugins[0].name})
+            return;
+        }
+        // If the current chosen plugin is not in the list of compatible plugins then reset it.
+        if (pluginName === null) {
+            return;
+        }
+        const compatible = plugins.some((plugin) => {
+            return plugin.name === pluginName
+        })
+        if (!compatible) {
+            this.setState({pluginName: null})
         }
     }
 
@@ -109,28 +125,20 @@ class DatasetAdder extends React.Component {
         const {plugins} = this.props;
         const {url, pluginName} = this.state;
         const openDisabled = (url === "" || !plugins || plugins.length === 0);
-        let selector = (
-            <PluginSelector pluginName={pluginName} plugins={plugins} onChange={this.handlePluginNameChange}/>
-        );
-        if (!plugins) {
-            selector = (
-                <Message>
-                    <span className="spinner-grow spinner-grow-sm mr-2" role="status" aria-hidden="true"/>
-                    Loading plugins...
-                </Message>
-            );
-        } else if (plugins.length === 0) {
-            selector = (
-                <Message>No compatible plugins found</Message>
-            );
-        }
         return (
-            <InputGroup>
-                <UrlInput url={url} onChange={this.handleURLChange}/>
-                {selector}
-                <OpenButton onAddDataset={this.handleAddDataset} disabled={openDisabled}/>
-            </InputGroup>
-        );
+            <div className="btn-toolbar d-flex" role="toolbar" aria-label="Toolbar for opening datasets">
+                <div className="input-group flex-grow-1">
+                    <UrlInput url={url} onChange={this.handleURLChange}/>
+                    {url !=="" &&
+                    <PluginSelector pluginName={pluginName}
+                                                  plugins={plugins}
+                                                  onChange={this.handlePluginNameChange}/>}
+                </div>
+                <button onClick={this.handleAddDataset}
+                        type="button" disabled={openDisabled}
+                        className="btn btn-primary text-nowrap ml-2">Open</button>
+            </div>
+    );
     }
 }
 
@@ -147,58 +155,55 @@ function UrlInput(props) {
 }
 
 function PluginSelector(props) {
-    const {plugins, onChange} = props;
-    let {pluginName} = props
-    if (!pluginName) {
-        pluginName = "Choose plugin";
-    }
     let handleOnClick = (event) => {
         event.preventDefault();
         onChange(event.target.value);
     }
-    return(
-        <div className="input-group-append dropdown">
-            <button id="pluginsDropdown" type="button" className="btn btn-secondary dropdown-toggle"
+    const {onChange, pluginName, plugins} = props;
+    let disabled = true;
+    let text = pluginName;
+    (() => {
+        if (!plugins) {
+            text = (
+                <>
+                    <span className="spinner-grow spinner-grow-sm mr-2" role="status" aria-hidden="true"/>
+                    Loading plugins...
+                </>
+            );
+            return;
+        }
+        if (plugins.length === 0) {
+            text = "No compatible plugins found";
+            return;
+        }
+        if (plugins.length > 1) {
+            disabled = false;
+        }
+        if (!pluginName) {
+            text = "Choose plugin";
+            return;
+        }
+    })();
+    let className = "btn btn-primary dropdown-toggle";
+    if (disabled) {
+        className += " dropdown-toggle-arrow-off";
+    }
+    return (
+        <div className="input-group-append">
+            <button id="pluginsDropdown" disabled={disabled}
+                    className={className}
+                    type="button"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                {pluginName}
+                {text}
             </button>
             <div className="dropdown-menu" aria-labelledby="pluginsDropdown">
-                {plugins.map((plugin, index) => {
+                {plugins && plugins.map((plugin, index) => {
                     return <button onClick={handleOnClick}
                                    key={index}
                                    value={plugin.name}
                                    className="dropdown-item">{plugin.name}</button>
                 })}
             </div>
-        </div>
-    );
-}
-
-function OpenButton(props) {
-    return(
-        <div className="input-group-append">
-            <button onClick={props.onAddDataset}
-                    type="button" disabled={props.disabled}
-                    className="btn btn-secondary text-nowrap">Open</button>
-        </div>
-    );
-}
-
-function InputGroup(props) {
-    return(
-        <div className="input-group">
-            {props.children}
-        </div>
-    );
-}
-
-function Message(props) {
-    return (
-        <div className="input-group-append dropdown">
-            <button type="button" className="btn btn-secondary" disabled>
-                {props.children}
-            </button>
-            <div className="dropdown-menu" aria-labelledby="pluginsDropdown">placeholder</div>
         </div>
     );
 }

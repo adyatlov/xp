@@ -65,6 +65,9 @@ type PropertyType {
 type Dataset {
     id:   ID!
     root: Object!
+    plugin: Plugin!
+    url: String!
+    added: Int!
 }
 
 type Plugin {
