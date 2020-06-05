@@ -58,14 +58,11 @@ export default class App extends React.Component {
             <QueryRenderer
                 environment={environment}
                 query={query}
-                // fetchPolicy={"store-and-network"}
+                fetchPolicy={"store-and-network"}
                 render={({error, props}) => {
                     if (error) {
                         return(
-                            <Alert warning>
-                                <h4 className="alert-heading">Error</h4>
-                                <p>{error.text}</p>
-                            </Alert>
+                            <Page500 text={error.text} />
                         );
                     }
                     if (!props) {
@@ -74,26 +71,16 @@ export default class App extends React.Component {
                         );
                     }
                     let datasets = props.datasets;
-                    if (match.path === "/") {
+                    if (match.path === "/" && match.isExact) {
                         return (
-                            <div id="root" className="container text-secondary">
-                                <h4 className="mt-5 mb-4">Welcome to XP,
-                                    <small> the explorer of heterogeneous datasets</small></h4>
-                                <p>Please, open a new dataset:</p>
-                                <DatasetAdder/>
-                                {datasets.length > 0 &&
-                                <>
-                                    <p className="mt-3">or choose the existing one:</p>
-                                    <DatasetList datasets={datasets}/>
-                                </>}
-                            </div>
+                            <PageHome datasets={datasets}>
+                            </PageHome>
                         );
                     }
                     return (
-                        <>
-                            <TopBar/>
-                            <AlertNoMatch/>
-                        </>
+                        <PageHome datasets={datasets}>
+                            <Page404/>
+                        </PageHome>
                     );
                 }} />
         );
@@ -111,25 +98,40 @@ function TopBar(props) {
     );
 }
 
-function Alert(props) {
-    let className = "alert alert-light";
-    if (props.warning) {
-        className = "alert alert-warning";
-    }
-    return(
-        <div className={className} role="alert">
-            {props.children}
+function Page404() {
+    let location = useLocation();
+    return (
+        <div className="alert alert-warning" role="alert">
+            <h4 className="alert-heading">Error</h4>
+            <p>Page <code>{location.pathname}</code> not found.</p>
         </div>
     );
 }
 
-function AlertNoMatch() {
-    let location = useLocation();
-    return (
-        <Alert warning>
+function Page500(props) {
+    return(
+        <div className="alert alert-warning" role="alert">
             <h4 className="alert-heading">Error</h4>
-            <p>Page <code>{location.pathname}</code> not found.</p>
-        </Alert>
+            <p>{props.text}</p>
+        </div>
+    );
+}
+
+function PageHome(props) {
+    const {datasets} = props;
+    return(
+        <div id="root" className="container text-secondary pt-5">
+            <h4 className="mb-4">Welcome to XP,
+                <small> the explorer of heterogeneous datasets</small></h4>
+            {props.children}
+            <p>Please, open a new dataset:</p>
+            <DatasetAdder/>
+            {datasets.length > 0 &&
+            <>
+                <p className="mt-3">or choose the existing one:</p>
+                <DatasetList datasets={datasets}/>
+            </>}
+        </div>
     );
 }
 
