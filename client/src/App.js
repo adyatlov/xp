@@ -6,6 +6,7 @@ import graphql from 'babel-plugin-relay/macro';
 import environment from "./relayEnvironment";
 import DatasetAdder from "./DatasetAdder";
 import DatasetList from "./DatasetList";
+import PluginList from "./PluginList";
 // import Properties from "./Properties";
 // import ChildrenTable from "./ChildrenTable";
 // import {ObjectViewLayout} from "./ObjectViewLayout";
@@ -14,6 +15,9 @@ const query = graphql`
     query AppQuery {
         datasets {
             ...DatasetList_datasets
+        }
+        plugins {
+            ...PluginList_plugins
         }
     }
 `;
@@ -44,7 +48,7 @@ requestSubscription(
         variables: {},
         onCompleted: () => console.log("Server disconnected the subscription."),
         onError: error => console.error(error),
-        updater: (store, data) => {
+        updater: (store) => {
             let newDatasets = store.getPluralRootField("datasetsChanged")
             store.getRoot().setLinkedRecords(newDatasets, "datasets");
         },
@@ -71,30 +75,53 @@ export default class App extends React.Component {
                         );
                     }
                     let datasets = props.datasets;
+                    let plugins = props.plugins;
                     if (match.path === "/" && match.isExact) {
                         return (
-                            <PageHome datasets={datasets}>
+                            <PageHome datasets={datasets} plugins={plugins}>
                             </PageHome>
                         );
                     }
                     return (
-                        <PageHome datasets={datasets}>
+                        <PageHome datasets={datasets} plugins={plugins}>
                             <Page404/>
                         </PageHome>
                     );
-                }} />
+                }}
+            />
         );
     }
 }
 
-function TopBar(props) {
-    return (
-        <nav className="navbar navbar-light bg-light">
-            <form className="form-inline">
-                {props.children}
-            </form>
-            <span className="navbar-brand">XP</span>
-        </nav>
+// function TopBar(props) {
+//     return (
+//         <nav className="navbar navbar-light bg-light">
+//             <form className="form-inline">
+//                 {props.children}
+//             </form>
+//             <span className="navbar-brand">XP</span>
+//         </nav>
+//     );
+// }
+
+function PageHome(props) {
+    const {datasets} = props;
+    return(
+        <div id="root" className="container pt-4">
+            <h1 className="mb-4">Welcome to XP
+                <small className="text-muted"> &mdash; the explorer of heterogeneous datasets</small></h1>
+            {props.children}
+            <p className="text-secondary">Please, open a new dataset:</p>
+            <DatasetAdder/>
+            {datasets.length > 0 &&
+            <>
+                <p className="mt-3 text-secondary">or choose the already loaded one:</p>
+                <h2>Datasets</h2>
+                <DatasetList datasets={datasets}/>
+            </>}
+            <h2>Plugins</h2>
+            <PluginList plugins={props.plugins}/>
+        </div>
     );
 }
 
@@ -113,24 +140,6 @@ function Page500(props) {
         <div className="alert alert-warning" role="alert">
             <h4 className="alert-heading">Error</h4>
             <p>{props.text}</p>
-        </div>
-    );
-}
-
-function PageHome(props) {
-    const {datasets} = props;
-    return(
-        <div id="root" className="container text-secondary pt-5">
-            <h4 className="mb-4">Welcome to XP,
-                <small> the explorer of heterogeneous datasets</small></h4>
-            {props.children}
-            <p>Please, open a new dataset:</p>
-            <DatasetAdder/>
-            {datasets.length > 0 &&
-            <>
-                <p className="mt-3">or choose the existing one:</p>
-                <DatasetList datasets={datasets}/>
-            </>}
         </div>
     );
 }
