@@ -10,8 +10,8 @@ import (
 )
 
 func encodeUniqueId(t data.ObjectTypeName, id data.ObjectId) graphql.ID {
-	typePart := base64.StdEncoding.EncodeToString([]byte(t))
-	idPart := base64.StdEncoding.EncodeToString([]byte(id))
+	typePart := base64.RawURLEncoding.EncodeToString([]byte(t))
+	idPart := base64.RawURLEncoding.EncodeToString([]byte(id))
 	return graphql.ID(typePart + ":" + idPart)
 }
 
@@ -20,8 +20,8 @@ func decodeUniqueId(id graphql.ID) (data.ObjectTypeName, data.ObjectId, error) {
 	if len(typeAndId) != 2 {
 		return "", "", fmt.Errorf("wrong ID format: %v", typeAndId)
 	}
-	typeStr, err := base64.StdEncoding.DecodeString(typeAndId[0])
-	idStr, err := base64.StdEncoding.DecodeString(typeAndId[1])
+	typeStr, err := base64.RawURLEncoding.DecodeString(typeAndId[0])
+	idStr, err := base64.RawURLEncoding.DecodeString(typeAndId[1])
 	if err != nil {
 		return "", "", err
 	}

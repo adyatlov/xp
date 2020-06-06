@@ -76,7 +76,7 @@ var PIncome = &data.PropertyType{
 
 var PExpenses = &data.PropertyType{
 	Name:        "expenses",
-	ValueType:   data.MVTReal,
+	ValueType:   data.MVTInteger,
 	Description: "money spent yearly",
 }
 

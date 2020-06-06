@@ -18,7 +18,7 @@ function PluginList(props) {
             {props.plugins.map((plugin) => {
                 return(
                     <tr key={plugin.name}>
-                        <td>{plugin.name}</td>
+                        <td className="text-nowrap">{plugin.name}</td>
                         <td>{plugin.description}</td>
                     </tr>
                 );

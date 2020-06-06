@@ -3,6 +3,7 @@ import {createFragmentContainer} from 'react-relay';
 import graphql from 'babel-plugin-relay/macro';
 
 import removeDataset from "./removeDataset";
+import ObjectLink from "./ObjectLink";
 
 function DatasetList(props) {
     if (!props.datasets) {
@@ -27,7 +28,11 @@ function DatasetList(props) {
                 added = added.toLocaleString();
                 return(
                     <tr key={dataset.id}>
-                        <td>{dataset.root.name}</td>
+                        <td className="text-nowrap">
+                            <ObjectLink datasetId={dataset.id} objectId={dataset.root.id}>
+                                {dataset.root.name}
+                            </ObjectLink>
+                        </td>
                         <td>{dataset.root.type.name}</td>
                         <td>{dataset.plugin.name}</td>
                         <td>{dataset.url}</td>
@@ -66,6 +71,7 @@ export default createFragmentContainer(DatasetList, {
             url
             added
             root {
+                id
                 name
                 type {
                     name

@@ -181,7 +181,6 @@ function PluginSelector(props) {
         }
         if (!pluginName) {
             text = "Choose plugin";
-            return;
         }
     })();
     let className = "btn btn-primary dropdown-toggle";

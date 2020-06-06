@@ -1,7 +1,7 @@
 package gql
 
 import (
-	plugins2 "github.com/adyatlov/xp/plugin"
+	plugin "github.com/adyatlov/xp/plugin"
 	"github.com/graph-gophers/graphql-go"
 
 	"github.com/adyatlov/xp/data"
@@ -53,19 +53,19 @@ func (q *Query) Datasets(args struct {
 }
 
 func (q *Query) Plugins(args struct{ Url *string }) ([]*pluginResolver, error) {
-	var plugins []plugins2.Plugin
+	var plugins []plugin.Plugin
 	if args.Url == nil || *args.Url == "" {
-		plugins = plugins2.GetPlugins()
+		plugins = plugin.GetPlugins()
 	} else {
 		var err error
-		plugins, err = plugins2.GetCompatiblePlugins(*args.Url)
+		plugins, err = plugin.GetCompatiblePlugins(*args.Url)
 		if err != nil {
 			return nil, err
 		}
 	}
 	resolvers := make([]*pluginResolver, 0, len(plugins))
-	for _, plugin := range plugins {
-		resolvers = append(resolvers, &pluginResolver{plugin})
+	for _, p := range plugins {
+		resolvers = append(resolvers, &pluginResolver{p})
 	}
 	return resolvers, nil
 }
