@@ -12,7 +12,10 @@ import PageHome from "./PageHome";
 import PageObject from "./PageObject";
 
 const query = graphql`
-    query AppQuery {
+    query AppQuery($nodeId: ID) {
+        node(id: $nodeId) {
+            ...PageObject_object
+        }
         allDatasets {
             ...DatasetList_datasets
         }
@@ -34,6 +37,9 @@ export default class App extends React.Component {
                 environment={environment}
                 query={query}
                 fetchPolicy={"store-and-network"}
+                variables={{
+                    nodeId: match.params["nodeId"],
+                }}
                 render={({error, props}) => {
                     if (error) {
                         console.error(error);
@@ -46,20 +52,19 @@ export default class App extends React.Component {
                             <LoadingSpinner />
                         );
                     }
-                    let datasets = props.allDatasets;
-                    let plugins = props.allPlugins;
+                    const {allDatasets, allPlugins} = props;
                     if (match.path === "/" && match.isExact) {
                         return (
-                            <PageHome datasets={datasets} plugins={plugins} />
+                            <PageHome datasets={allDatasets} plugins={allPlugins} />
                         );
                     }
-                    if (match.path === "/o/:datasetId/:objectId" && match.isExact) {
+                    if (match.path === "/o/:nodeId" && match.isExact) {
                         return (
-                            <PageObject />
+                            <PageObject object={props.object}/>
                         )
                     }
                     return (
-                        <PageHome datasets={datasets} plugins={plugins}>
+                        <PageHome datasets={allDatasets} plugins={allPlugins}>
                             <Error404 />
                         </PageHome>
                     );

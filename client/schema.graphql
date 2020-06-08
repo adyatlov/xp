@@ -15,7 +15,7 @@ schema {
 }
 
 type Query {
-    node(id: ID!):                  Node
+    node(id: ID):                   Node
     allDatasets:                    [Dataset!]!
     allPlugins:                     [Plugin!]!
     compatiblePlugins(url: String): [Plugin!]!

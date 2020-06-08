@@ -5,7 +5,7 @@ import DatasetList from "./DatasetList";
 import PluginList from "./PluginList";
 
 export default function PageHome(props) {
-    const {datasets} = props;
+    const {datasets, plugins} = props;
     return(
         <div id="root" className="container pt-4">
             <h1 className="mb-4">Welcome to XP
@@ -22,7 +22,7 @@ export default function PageHome(props) {
             <p className="mt-3 text-secondary">To open a dataset of a particular type, you need a corresponding plugin.
                 Below is the list of available plugins:</p>
             <h2>Plugins</h2>
-            <PluginList plugins={props.plugins}/>
+            <PluginList plugins={plugins}/>
         </div>
     );
 }

@@ -26,8 +26,8 @@ console.myLog = function(){
 ReactDOM.render(
     <Router>
         <Route path={[
-            "/o/:objectId/:childrenTypeName",
-            "/o/:objectId",
+            "/o/:nodeId/:childrenTypeName",
+            "/o/:nodeId",
             "/"]} component={App}/>
     </Router>,
     document.getElementById('root')

@@ -3,7 +3,8 @@ import {createFragmentContainer} from 'react-relay';
 import graphql from 'babel-plugin-relay/macro';
 
 function PluginList(props) {
-    if (!props.plugins) {
+    const plugins = props.plugins;
+    if (!plugins) {
         return <div>Loading plugin list...</div>
     }
     return(
@@ -15,7 +16,7 @@ function PluginList(props) {
             </tr>
             </thead>
             <tbody>
-            {props.plugins.map((plugin) => {
+            {plugins.map((plugin) => {
                 return(
                     <tr key={plugin.name}>
                         <td className="text-nowrap">{plugin.name}</td>

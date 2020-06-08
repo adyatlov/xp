@@ -12,9 +12,12 @@ type Query struct {
 }
 
 func (q *Query) Node(args struct {
-	Id graphql.ID
+	Id *graphql.ID
 }) (*nodeResolver, error) {
-	id := decodeId(args.Id)
+	if args.Id == nil {
+		return nil, nil
+	}
+	id := decodeId(*args.Id)
 	switch id := id.(type) {
 	case objectId:
 		dataset, err := q.datasets.Get(id.datasetId)
@@ -25,7 +28,7 @@ func (q *Query) Node(args struct {
 		if err != nil {
 			return nil, err
 		}
-		return &nodeResolver{&objectResolver{id: args.Id, object: object}}, nil
+		return &nodeResolver{&objectResolver{id: *args.Id, object: object}}, nil
 	case propertyId:
 		dataset, err := q.datasets.Get(id.datasetId)
 		if err != nil {
@@ -39,7 +42,7 @@ func (q *Query) Node(args struct {
 		if err != nil {
 			return nil, err
 		}
-		return &nodeResolver{&propertyResolver{id: args.Id, property: properties[0]}}, nil
+		return &nodeResolver{&propertyResolver{id: *args.Id, property: properties[0]}}, nil
 	case objectGroupId:
 		dataset, err := q.datasets.Get(id.datasetId)
 		if err != nil {
@@ -53,19 +56,19 @@ func (q *Query) Node(args struct {
 		if err != nil {
 			return nil, err
 		}
-		return &nodeResolver{&objectGroupResolver{id: args.Id, group: groups[0]}}, nil
+		return &nodeResolver{&objectGroupResolver{id: *args.Id, group: groups[0]}}, nil
 	case datasetId:
 		dataset, err := q.datasets.Get(id)
 		if err != nil {
 			return nil, err
 		}
-		return &nodeResolver{&datasetResolver{id: args.Id, dataset: dataset}}, nil
+		return &nodeResolver{&datasetResolver{id: *args.Id, dataset: dataset}}, nil
 	case plugin.Name:
 		p, err := plugin.GetPlugin(id)
 		if err != nil {
 			return nil, err
 		}
-		return &nodeResolver{&pluginResolver{id: args.Id, plugin: p}}, nil
+		return &nodeResolver{&pluginResolver{id: *args.Id, plugin: p}}, nil
 	}
 	panic(fmt.Sprintf("Unknown ID type: %T", id))
 }

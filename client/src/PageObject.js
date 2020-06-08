@@ -1,15 +1,16 @@
 import React from "react";
 import graphql from 'babel-plugin-relay/macro';
-import {QueryRenderer} from 'react-relay';
-import {useParams} from "react-router-dom";
+import {createFragmentContainer} from 'react-relay';
 
-import environment from "./relayEnvironment";
-import Error from "./Error";
-import LoadingSpinner from "./LoadingSpinner";
+function PageObject(props) {
+    return (
+        <div>{props.object.name}</div>
+    );
+}
 
-const query = graphql`
-    query PageObjectQuery($objectId: ID!) {
-        node(id: $objectId) {
+export default createFragmentContainer(PageObject, {
+    object: graphql`
+        fragment PageObject_object on Node {
             id
             ... on Object {
                 name
@@ -35,39 +36,6 @@ const query = graphql`
                 }
             }
         }
-    }`;
-
-export default function PageObjectQuery(props) {
-    const {datasetId, objectId} = useParams();
-    return (
-        <QueryRenderer
-            environment={environment}
-            query={query}
-            fetchPolicy={"store-and-network"}
-            variables={{datasetId: datasetId, objectId: objectId}}
-            render={({error, props}) => {
-                if (error) {
-                    console.error(error);
-                    return(
-                        <Error text={error.message} />
-                    );
-                }
-                if (!props) {
-                    return (
-                        <LoadingSpinner />
-                    );
-                }
-                return (
-                    <PageObject object={props.object}/>
-                );
-            }}
-        />
-    );
-}
-
-function PageObject(props) {
-    return (
-        <div>{props.object.name}</div>
-    );
-}
+    `
+});
 
