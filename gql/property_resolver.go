@@ -4,11 +4,18 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/graph-gophers/graphql-go"
+
 	"github.com/adyatlov/xp/data"
 )
 
 type propertyResolver struct {
 	property data.Property
+	id       graphql.ID
+}
+
+func (r *propertyResolver) Id() graphql.ID {
+	return r.id
 }
 
 func (r *propertyResolver) Type() *propertyTypeResolver {
@@ -17,30 +24,36 @@ func (r *propertyResolver) Type() *propertyTypeResolver {
 
 func (r *propertyResolver) Value() (value string) {
 	v := r.property.Value()
-	switch r.property.Type().ValueType {
-	case data.MVTBool:
+	switch r.property.Type().Type {
+	case data.PVTBool:
 		value = strconv.FormatBool(v.(bool))
-	case data.MVTString:
+	case data.PVTString:
 		value = v.(string)
-	case data.MVTInteger:
+	case data.PVTInteger:
 		value = strconv.Itoa(v.(int))
-	case data.MVTReal:
+	case data.PVTReal:
 		value = strconv.FormatFloat(v.(float64), 'f', 10, 64)
-	case data.MVTPercentage:
+	case data.PVTPercentage:
 		value = strconv.FormatFloat(v.(float64), 'f', 10, 64)
-	case data.MVTVersion:
+	case data.PVTVersion:
 		value = v.(string)
-	case data.MVTTimestamp:
+	case data.PVTTimestamp:
 		value = strconv.FormatInt(v.(time.Time).UnixNano()/1e6, 10)
-	case data.MVTType:
+	case data.PVTType:
 		value = v.(string)
-	case data.MVTFile:
+	case data.PVTFile:
 		value = v.(string)
-	case data.MVTObject:
+	case data.PVTObject:
 		o := v.(data.Object)
-		value = string(encodeUniqueId(o.Type().Name, o.Id()))
+		pId := decodeId(r.id).(propertyId)
+		oId := encodeId(objectId{
+			datasetId:      pId.datasetId,
+			ObjectTypeName: o.Type().Name,
+			ObjectId:       o.Id(),
+		})
+		value = string(oId)
 	default:
-		panic("unknown property value type: " + r.property.Type().ValueType)
+		panic("unknown property value type: " + strconv.Itoa(int(r.property.Type().Type)))
 	}
 	return
 }

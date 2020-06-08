@@ -8,29 +8,31 @@ import Error from "./Error";
 import LoadingSpinner from "./LoadingSpinner";
 
 const query = graphql`
-    query PageObjectQuery($datasetId: ID!, $objectId: ID!) {
-        object(datasetId: $datasetId, id: $objectId) {
+    query PageObjectQuery($objectId: ID!) {
+        node(id: $objectId) {
             id
-            name
-            type {
+            ... on Object {
                 name
-                description
-            }
-            properties {
-                value
                 type {
                     name
-                    valueType
                     description
                 }
-            }
-            children {
-                type {
-                    name
-                    pluralName
-                    description
+                properties {
+                    value
+                    type {
+                        name
+                        valueType
+                        description
+                    }
                 }
-                total
+                children {
+                    type {
+                        name
+                        pluralName
+                        description
+                    }
+                    total
+                }
             }
         }
     }`;

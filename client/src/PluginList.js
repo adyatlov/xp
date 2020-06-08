@@ -31,6 +31,7 @@ function PluginList(props) {
 export default createFragmentContainer(PluginList, {
     plugins: graphql`
         fragment PluginList_plugins on Plugin@relay(plural: true) {
+            id
             name
             description
         }

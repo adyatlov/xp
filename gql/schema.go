@@ -13,7 +13,8 @@ func NewSchema() *Schema {
 	schema.Query.datasets = schema.datasets
 	schema.Subscription = newSubscription(schema.datasets)
 	schema.Mutation.datasets = schema.datasets
-	schema.Mutation.onDatasetUpdate = schema.Subscription.DatasetsUpdated
+	schema.Mutation.onDatasetAdded = schema.Subscription.NotifyDatasetAdded
+	schema.Mutation.onDatasetRemoved = schema.Subscription.NotifyDatasetRemoved
 	return schema
 }
 
@@ -35,63 +36,77 @@ schema {
 }
 
 type Query {
-    object(datasetId: ID!, id: ID!): Object!
-    datasets(Ids: [ID!]): [Dataset!]!
-    plugins(url: String): [Plugin!]!
+    node(id: ID!):                  Node
+    allDatasets:                    [Dataset!]!
+    allPlugins:                     [Plugin!]!
+    compatiblePlugins(url: String): [Plugin!]!
 }
 
 type Mutation {
-    addDataset(plugin: String!, url: String!): Dataset!
-    removeDataset(id: ID!): Boolean!
+    addDataset(pluginName: String!, url: String!): Dataset!
+    removeDataset(id: ID!):                    Boolean!
 }
 
 type Subscription {
-    datasetsChanged: [Dataset!]!
+    datasetUpdated: DatasetEvent!
 }
 
-type Object {
-    type:                           ObjectType!
-    id:								ID!
-    name:                           String!
-    children(typeNames: [String!]): [ObjectGroup!]!
-    properties(typeNames: [String!]):  [Property!]!
+type DatasetEvent {
+    eventType: String!
+    idToRemove: ID
+    dataset: Dataset
 }
 
-type ObjectGroup {
-    type: ObjectType!
-    objects:  [Object!]!
-    total:    Int!
+interface Node {
+    id: ID!
 }
 
-type ObjectType {
-    name:           String!
-    pluralName: 	String!
-    description:    String!
-    properties:        [PropertyType!]!
-    defaultProperties: [String!]!
+type Object implements Node {
+    id:								  ID!
+    type:                             ObjectType!
+    name:                             String!
+    children(typeNames: [String!]):   [ObjectGroup!]!
+    properties(typeNames: [String!]): [Property!]!
 }
 
-type Property {
+type Property implements Node {
+    id:          ID!
     type:  PropertyType!
     value: String!
 }
 
-type PropertyType {
-    name:           String!
-    valueType:      PropertyValueType!
-    description:    String!
+type ObjectGroup implements Node {
+    id:      ID!
+    type:    ObjectType!
+    objects: [Object!]!
+    total:   Int!
 }
 
-type Dataset {
-    id:   ID!
-    root: Object!
+type Dataset implements Node {
+    id:     ID!
+    root:   Object!
     plugin: Plugin!
-    url: String!
-    added: String!
+    url:    String!
+    added:  String!
 }
 
-type Plugin {
-    name: String!
+type Plugin implements Node {
+    id:          ID!
+    name:        String!
+    description: String!
+}
+
+type ObjectType {
+    name:              String!
+    pluralName:        String!
+    description:       String!
+    properties:        [PropertyType!]!
+    defaultProperties: [String!]!
+}
+
+type PropertyType {
+    name:        String!
+    valueType:   PropertyValueType!
     description: String!
 }
 `

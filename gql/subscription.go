@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 
+	"github.com/graph-gophers/graphql-go"
+
 	"github.com/dustin/go-broadcast"
 )
 
@@ -18,8 +20,8 @@ func newSubscription(registry *datasetRegistry) Subscription {
 	return s
 }
 
-func (s *Subscription) DatasetsChanged(ctx context.Context) <-chan []*datasetResolver {
-	c := make(chan []*datasetResolver)
+func (s *Subscription) DatasetUpdated(ctx context.Context) <-chan *datasetEventResolver {
+	c := make(chan *datasetEventResolver)
 	ic := make(chan interface{})
 	s.datasetsBroadcaster.Register(ic)
 	go func() {
@@ -28,7 +30,7 @@ func (s *Subscription) DatasetsChanged(ctx context.Context) <-chan []*datasetRes
 			case d := <-ic:
 				{
 					log.Println("Send push")
-					c <- d.([]*datasetResolver)
+					c <- d.(*datasetEventResolver)
 				}
 			case <-ctx.Done():
 				{
@@ -41,11 +43,34 @@ func (s *Subscription) DatasetsChanged(ctx context.Context) <-chan []*datasetRes
 	return c
 }
 
-func (s *Subscription) DatasetsUpdated() {
-	datasets := s.datasets.GetAll()
-	datasetResolvers := make([]*datasetResolver, 0, len(datasets))
-	for _, dataset := range datasets {
-		datasetResolvers = append(datasetResolvers, &datasetResolver{dataset: dataset})
-	}
-	s.datasetsBroadcaster.Submit(datasetResolvers)
+func (s *Subscription) NotifyDatasetAdded(r *datasetResolver) {
+	s.datasetsBroadcaster.Submit(&datasetEventResolver{
+		eventType: "added",
+		dataset:   r,
+	})
+}
+
+func (s *Subscription) NotifyDatasetRemoved(id graphql.ID) {
+	s.datasetsBroadcaster.Submit(&datasetEventResolver{
+		eventType:  "removed",
+		idToRemove: &id,
+	})
+}
+
+type datasetEventResolver struct {
+	eventType  string
+	idToRemove *graphql.ID
+	dataset    *datasetResolver
+}
+
+func (r datasetEventResolver) EventType() string {
+	return r.eventType
+}
+
+func (r datasetEventResolver) IdToRemove() *graphql.ID {
+	return r.idToRemove
+}
+
+func (r datasetEventResolver) Dataset() *datasetResolver {
+	return r.dataset
 }

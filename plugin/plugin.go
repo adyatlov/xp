@@ -7,11 +7,13 @@ import (
 	"github.com/adyatlov/xp/data"
 )
 
-var plugins = make(map[data.PluginName]Plugin)
+type Name string
+
+var plugins = make(map[Name]Plugin)
 var pluginsMu = &sync.RWMutex{}
 
 type Plugin interface {
-	Name() data.PluginName
+	Name() Name
 	Description() string
 	Open(url string) (data.Dataset, error)
 	Compatible(url string) (bool, error)
@@ -29,7 +31,7 @@ func RegisterPlugin(plugin Plugin) {
 	plugins[plugin.Name()] = plugin
 }
 
-func GetPlugin(name data.PluginName) (Plugin, error) {
+func GetPlugin(name Name) (Plugin, error) {
 	pluginsMu.RLock()
 	plugin, ok := plugins[name]
 	pluginsMu.RUnlock()

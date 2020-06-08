@@ -6,7 +6,7 @@ import environment from "./relayEnvironment";
 
 const query = graphql`
     query DatasetAdderQuery ($url: String) {
-        plugins(url: $url) {
+        compatiblePlugins(url: $url) {
             name
         }
     }
@@ -14,7 +14,7 @@ const query = graphql`
 
 const mutation = graphql`
     mutation DatasetAdderAddDatasetMutation($plugin: String!, $url: String!) {
-        addDataset(plugin: $plugin, url: $url) {
+        addDataset(pluginName: $plugin, url: $url) {
             id
         }
     }
@@ -62,7 +62,7 @@ export default class DatasetAdderQuery extends React.Component{
                     }
                     let plugins = null
                     if (props) {
-                        plugins = props.plugins;
+                        plugins = props.compatiblePlugins;
                     }
                     return (
                         <DatasetAdder plugins={plugins} onURLChange={this.handleURLChange}/>

@@ -7,11 +7,12 @@ import (
 )
 
 type datasetResolver struct {
+	id      graphql.ID
 	dataset DatasetInfo
 }
 
 func (r *datasetResolver) Id() graphql.ID {
-	return graphql.ID(r.dataset.Id())
+	return r.id
 }
 
 func (r *datasetResolver) Root() (*objectResolver, error) {
@@ -19,11 +20,17 @@ func (r *datasetResolver) Root() (*objectResolver, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &objectResolver{root}, nil
+	id := encodeId(objectId{
+		datasetId:      datasetId{PluginName: r.dataset.Plugin.Name(), DatasetId: r.dataset.Id()},
+		ObjectTypeName: root.Type().Name,
+		ObjectId:       root.Id(),
+	})
+	return &objectResolver{id: id, object: root}, nil
 }
 
 func (r *datasetResolver) Plugin() *pluginResolver {
-	return &pluginResolver{r.dataset.Plugin}
+	id := encodeId(r.dataset.Plugin.Name())
+	return &pluginResolver{id: id, plugin: r.dataset.Plugin}
 }
 
 func (r *datasetResolver) URL() string {

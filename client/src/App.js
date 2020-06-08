@@ -13,10 +13,10 @@ import PageObject from "./PageObject";
 
 const query = graphql`
     query AppQuery {
-        datasets {
+        allDatasets {
             ...DatasetList_datasets
         }
-        plugins {
+        allPlugins {
             ...PluginList_plugins
         }
     }
@@ -46,8 +46,8 @@ export default class App extends React.Component {
                             <LoadingSpinner />
                         );
                     }
-                    let datasets = props.datasets;
-                    let plugins = props.plugins;
+                    let datasets = props.allDatasets;
+                    let plugins = props.allPlugins;
                     if (match.path === "/" && match.isExact) {
                         return (
                             <PageHome datasets={datasets} plugins={plugins} />

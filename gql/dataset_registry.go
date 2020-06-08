@@ -10,20 +10,20 @@ import (
 )
 
 type DatasetInfo struct {
+	plugin.Plugin
 	data.Dataset
-	Plugin plugin.Plugin
-	Url    string
-	Added  time.Time
+	Url   string
+	Added time.Time
 }
 
 type datasetRegistry struct {
-	datasets   map[data.DatasetId]DatasetInfo
+	datasets   map[datasetId]DatasetInfo
 	datasetsMu *sync.RWMutex
 }
 
 func NewDatasetRegistry() *datasetRegistry {
 	registry := &datasetRegistry{}
-	registry.datasets = make(map[data.DatasetId]DatasetInfo)
+	registry.datasets = make(map[datasetId]DatasetInfo)
 	registry.datasetsMu = &sync.RWMutex{}
 	return registry
 }
@@ -31,14 +31,15 @@ func NewDatasetRegistry() *datasetRegistry {
 func (r *datasetRegistry) Add(dataset DatasetInfo) error {
 	r.datasetsMu.Lock()
 	defer r.datasetsMu.Unlock()
-	if _, ok := r.datasets[dataset.Id()]; ok {
+	id := datasetId{PluginName: dataset.Plugin.Name(), DatasetId: dataset.Id()}
+	if _, ok := r.datasets[id]; ok {
 		return fmt.Errorf("dataset %v already opened", dataset.Id())
 	}
-	r.datasets[dataset.Id()] = dataset
+	r.datasets[id] = dataset
 	return nil
 }
 
-func (r *datasetRegistry) Get(id data.DatasetId) (DatasetInfo, error) {
+func (r *datasetRegistry) Get(id datasetId) (DatasetInfo, error) {
 	r.datasetsMu.RLock()
 	defer r.datasetsMu.RUnlock()
 	if dataset, ok := r.datasets[id]; ok {
@@ -57,7 +58,7 @@ func (r *datasetRegistry) GetAll() []DatasetInfo {
 	return res
 }
 
-func (r *datasetRegistry) Remove(id data.DatasetId) error {
+func (r *datasetRegistry) Remove(id datasetId) error {
 	r.datasetsMu.Lock()
 	defer r.datasetsMu.Unlock()
 	_, ok := r.datasets[id]

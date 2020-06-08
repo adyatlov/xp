@@ -26,8 +26,8 @@ console.myLog = function(){
 ReactDOM.render(
     <Router>
         <Route path={[
-            "/o/:datasetId/:objectId/:childrenTypeName",
-            "/o/:datasetId/:objectId",
+            "/o/:objectId/:childrenTypeName",
+            "/o/:objectId",
             "/"]} component={App}/>
     </Router>,
     document.getElementById('root')

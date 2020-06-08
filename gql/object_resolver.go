@@ -1,34 +1,12 @@
 package gql
 
 import (
-	"encoding/base64"
-	"fmt"
-	"strings"
-
 	"github.com/adyatlov/xp/data"
 	"github.com/graph-gophers/graphql-go"
 )
 
-func encodeUniqueId(t data.ObjectTypeName, id data.ObjectId) graphql.ID {
-	typePart := base64.RawURLEncoding.EncodeToString([]byte(t))
-	idPart := base64.RawURLEncoding.EncodeToString([]byte(id))
-	return graphql.ID(typePart + ":" + idPart)
-}
-
-func decodeUniqueId(id graphql.ID) (data.ObjectTypeName, data.ObjectId, error) {
-	typeAndId := strings.Split(string(id), ":")
-	if len(typeAndId) != 2 {
-		return "", "", fmt.Errorf("wrong ID format: %v", typeAndId)
-	}
-	typeStr, err := base64.RawURLEncoding.DecodeString(typeAndId[0])
-	idStr, err := base64.RawURLEncoding.DecodeString(typeAndId[1])
-	if err != nil {
-		return "", "", err
-	}
-	return data.ObjectTypeName(typeStr), data.ObjectId(idStr), nil
-}
-
 type objectResolver struct {
+	id     graphql.ID
 	object data.Object
 }
 
@@ -37,7 +15,7 @@ func (r *objectResolver) Type() *objectTypeResolver {
 }
 
 func (r *objectResolver) Id() graphql.ID {
-	return encodeUniqueId(r.object.Type().Name, r.object.Id())
+	return r.id
 }
 
 func (r *objectResolver) Name() string {
@@ -60,7 +38,11 @@ func (r *objectResolver) Children(args struct {
 	}
 	resolvers := make([]*objectGroupResolver, 0, len(groups))
 	for _, group := range groups {
-		resolvers = append(resolvers, &objectGroupResolver{group})
+		id := encodeId(objectGroupId{
+			objectId:      decodeId(r.id).(objectId),
+			GroupTypeName: group.Type().Name,
+		})
+		resolvers = append(resolvers, &objectGroupResolver{id: id, group: group})
 	}
 	return resolvers, nil
 }
@@ -68,11 +50,11 @@ func (r *objectResolver) Children(args struct {
 func (r *objectResolver) Properties(args struct {
 	TypeNames *[]string
 }) ([]*propertyResolver, error) {
-	var typeNames []data.PropertyTypeName
+	var typeNames []data.PropertyName
 	if args.TypeNames != nil {
-		typeNames = make([]data.PropertyTypeName, 0, len(*args.TypeNames))
+		typeNames = make([]data.PropertyName, 0, len(*args.TypeNames))
 		for _, typeName := range *args.TypeNames {
-			typeNames = append(typeNames, data.PropertyTypeName(typeName))
+			typeNames = append(typeNames, data.PropertyName(typeName))
 		}
 	}
 	properties, err := r.object.Properties(typeNames...)
@@ -81,7 +63,11 @@ func (r *objectResolver) Properties(args struct {
 	}
 	resolvers := make([]*propertyResolver, 0, len(properties))
 	for _, property := range properties {
-		resolvers = append(resolvers, &propertyResolver{property})
+		id := encodeId(propertyId{
+			objectId:     decodeId(r.id).(objectId),
+			PropertyName: property.Type().Name,
+		})
+		resolvers = append(resolvers, &propertyResolver{id: id, property: property})
 	}
 	return resolvers, nil
 }

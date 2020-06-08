@@ -13,7 +13,7 @@ func init() {
 type Plugin struct {
 }
 
-func (p Plugin) Name() data.PluginName {
+func (p Plugin) Name() plugin.Name {
 	return "DC/OS Cluster"
 }
 

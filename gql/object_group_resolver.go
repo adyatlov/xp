@@ -1,9 +1,17 @@
 package gql
 
-import "github.com/adyatlov/xp/data"
+import (
+	"github.com/adyatlov/xp/data"
+	"github.com/graph-gophers/graphql-go"
+)
 
 type objectGroupResolver struct {
 	group data.ObjectGroup
+	id    graphql.ID
+}
+
+func (r *objectGroupResolver) Id() graphql.ID {
+	return r.id
 }
 
 func (r *objectGroupResolver) Type() *objectTypeResolver {

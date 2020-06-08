@@ -18,18 +18,18 @@ function DatasetList(props) {
                 <th scope="col">Plugin</th>
                 <th scope="col">URL</th>
                 <th scope="col">Added</th>
-                <th scope="col"></th>
+                <th scope="col"/>
             </tr>
             </thead>
             <tbody>
-            {props.datasets.map((dataset, index) => {
+            {props.datasets.map((dataset) => {
                 let added = parseInt(dataset.added) * 1000;
                 added = new Date(added);
                 added = added.toLocaleString();
                 return(
                     <tr key={dataset.id}>
                         <td className="text-nowrap">
-                            <ObjectLink datasetId={dataset.id} objectId={dataset.root.id}>
+                            <ObjectLink objectId={dataset.root.id}>
                                 {dataset.root.name}
                             </ObjectLink>
                         </td>

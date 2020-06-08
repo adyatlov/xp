@@ -3,17 +3,127 @@ package example
 import (
 	"fmt"
 
+	"github.com/adyatlov/xp/plugin"
+
 	"github.com/adyatlov/xp/data"
 )
 
+// Check implementation
+var _ data.Object = &Object{}
+var _ data.Property = &Property{}
+var _ data.ObjectGroup = &ObjectGroup{}
+var _ data.Dataset = &Dataset{}
+var _ plugin.Plugin = &Plugin{}
+
+type Object struct {
+	t          *data.ObjectType
+	id         data.ObjectId
+	name       data.ObjectName
+	properties map[data.PropertyName]data.Property
+	children   map[data.ObjectTypeName]*ObjectGroup
+}
+
+func NewObject(t *data.ObjectType, id data.ObjectId, name data.ObjectName) *Object {
+	object := &Object{t: t, id: id, name: name}
+	object.properties = make(map[data.PropertyName]data.Property)
+	object.children = make(map[data.ObjectTypeName]*ObjectGroup)
+	return object
+}
+
+func (o *Object) AddProperty(property data.Property) {
+	if _, ok := o.properties[property.Type().Name]; ok {
+		panic(fmt.Sprintf("property %v already exists in object %v",
+			property.Type().Name, o.name))
+	}
+	o.properties[property.Type().Name] = property
+}
+
+func (o *Object) AddChild(child data.Object) {
+	group := o.children[child.Type().Name]
+	if group == nil {
+		group = NewObjectGroup(child.Type())
+		o.children[child.Type().Name] = group
+	}
+	group.AddObject(child)
+}
+
+func (o *Object) Type() *data.ObjectType {
+	return o.t
+}
+
+func (o *Object) Id() data.ObjectId {
+	return o.id
+}
+
+func (o *Object) Name() data.ObjectName {
+	return o.name
+}
+
+func (o *Object) Children(typeNames ...data.ObjectTypeName) ([]data.ObjectGroup, error) {
+	var groups []data.ObjectGroup
+	if len(typeNames) == 0 {
+		groups = make([]data.ObjectGroup, 0, len(o.children))
+		for _, g := range o.children {
+			groups = append(groups, g)
+		}
+		return groups, nil
+	}
+	groups = make([]data.ObjectGroup, 0, len(typeNames))
+	for _, typeName := range typeNames {
+		group, ok := o.children[typeName]
+		if !ok {
+			return nil, fmt.Errorf("cannot find children with typeName %v", typeName)
+		}
+		groups = append(groups, group)
+	}
+	return groups, nil
+}
+
+func (o *Object) Properties(typeNames ...data.PropertyName) ([]data.Property, error) {
+	var properties []data.Property
+	if len(typeNames) == 0 {
+		properties = make([]data.Property, 0, len(o.properties))
+		for _, property := range o.properties {
+			properties = append(properties, property)
+		}
+		return properties, nil
+	}
+	properties = make([]data.Property, 0, len(typeNames))
+	for _, typeName := range typeNames {
+		property, ok := o.properties[typeName]
+		if !ok {
+			return nil, fmt.Errorf("cannot find property with typeName %v", typeName)
+		}
+		properties = append(properties, property)
+	}
+	return properties, nil
+}
+
+type Property struct {
+	t     *data.PropertyType
+	value interface{}
+}
+
+func NewProperty(t *data.PropertyType, value interface{}) *Property {
+	return &Property{t: t, value: value}
+}
+
+func (p *Property) Type() *data.PropertyType {
+	return p.t
+}
+
+func (p *Property) Value() interface{} {
+	return p.value
+}
+
 type Plugin struct {
-	name        data.PluginName
+	name        plugin.Name
 	description string
 	open        func(url string) (data.Dataset, error)
 	compatible  func(url string) (bool, error)
 }
 
-func NewPlugin(name data.PluginName,
+func NewPlugin(name plugin.Name,
 	description string,
 	open func(url string) (data.Dataset, error),
 	compatible func(url string) (bool, error)) *Plugin {
@@ -25,7 +135,7 @@ func NewPlugin(name data.PluginName,
 	}
 }
 
-func (p *Plugin) Name() data.PluginName {
+func (p *Plugin) Name() plugin.Name {
 	return p.name
 }
 
@@ -89,107 +199,6 @@ func (d *Dataset) AddObject(o data.Object) {
 		d.objects[o.Type().Name] = objects
 	}
 	objects[o.Id()] = o
-}
-
-type Object struct {
-	t          *data.ObjectType
-	id         data.ObjectId
-	name       data.ObjectName
-	properties map[data.PropertyTypeName]data.Property
-	children   map[data.ObjectTypeName]*ObjectGroup
-}
-
-func NewObject(t *data.ObjectType, id data.ObjectId, name data.ObjectName) *Object {
-	object := &Object{t: t, id: id, name: name}
-	object.properties = make(map[data.PropertyTypeName]data.Property)
-	object.children = make(map[data.ObjectTypeName]*ObjectGroup)
-	return object
-}
-
-func (o *Object) AddChild(child data.Object) {
-	group := o.children[child.Type().Name]
-	if group == nil {
-		group = NewObjectGroup(child.Type())
-		o.children[child.Type().Name] = group
-	}
-	group.AddObject(child)
-}
-
-func (o *Object) AddProperty(property data.Property) {
-	if _, ok := o.properties[property.Type().Name]; ok {
-		panic(fmt.Sprintf("property %v already exists in object %v",
-			property.Type().Name, o.name))
-	}
-	o.properties[property.Type().Name] = property
-}
-
-func (o *Object) Type() *data.ObjectType {
-	return o.t
-}
-
-func (o *Object) Id() data.ObjectId {
-	return data.ObjectId(o.id)
-}
-
-func (o *Object) Name() data.ObjectName {
-	return o.name
-}
-
-func (o Object) Children(typeNames ...data.ObjectTypeName) ([]data.ObjectGroup, error) {
-	var groups []data.ObjectGroup
-	if len(typeNames) == 0 {
-		groups = make([]data.ObjectGroup, 0, len(o.children))
-		for _, g := range o.children {
-			groups = append(groups, g)
-		}
-		return groups, nil
-	}
-	groups = make([]data.ObjectGroup, 0, len(typeNames))
-	for _, typeName := range typeNames {
-		group, ok := o.children[typeName]
-		if !ok {
-			return nil, fmt.Errorf("cannot find children with typeName %v", typeName)
-		}
-		groups = append(groups, group)
-	}
-	return groups, nil
-}
-
-func (o Object) Properties(typeNames ...data.PropertyTypeName) ([]data.Property, error) {
-	var properties []data.Property
-	if len(typeNames) == 0 {
-		properties = make([]data.Property, 0, len(o.properties))
-		for _, property := range o.properties {
-			properties = append(properties, property)
-		}
-		return properties, nil
-	}
-	properties = make([]data.Property, 0, len(typeNames))
-	for _, typeName := range typeNames {
-		property, ok := o.properties[typeName]
-		if !ok {
-			return nil, fmt.Errorf("cannot find property with typeName %v", typeName)
-		}
-		properties = append(properties, property)
-	}
-	return properties, nil
-}
-
-type Property struct {
-	t     *data.PropertyType
-	value interface{}
-}
-
-func NewProperty(t *data.PropertyType, value interface{}) *Property {
-	return &Property{t: t, value: value}
-}
-
-func (p *Property) Type() *data.PropertyType {
-	return p.t
-}
-
-func (p *Property) Value() interface{} {
-	return p.value
 }
 
 type ObjectGroup struct {

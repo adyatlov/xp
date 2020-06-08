@@ -4,37 +4,47 @@ type (
 	ObjectId          string
 	ObjectTypeName    string
 	ObjectName        string
-	PropertyTypeName  string
-	PropertyValueType string
+	PropertyName      string
+	PropertyValueType int
 	DatasetId         string
-	PluginName        string
 )
 
 const (
-	MVTBool       PropertyValueType = "bool"
-	MVTString     PropertyValueType = "string"
-	MVTInteger    PropertyValueType = "integer"
-	MVTReal       PropertyValueType = "real"
-	MVTPercentage PropertyValueType = "percentage"
-	MVTVersion    PropertyValueType = "version"
-	MVTTimestamp  PropertyValueType = "timestamp"
-	MVTType       PropertyValueType = "type"
-	MVTFile       PropertyValueType = "file"
-	MVTObject     PropertyValueType = "object"
+	PVTBool       PropertyValueType = 1
+	PVTString                       = 2
+	PVTInteger                      = 3
+	PVTReal                         = 4
+	PVTPercentage                   = 5
+	PVTVersion                      = 6
+	PVTTimestamp                    = 7
+	PVTType                         = 8
+	PVTFile                         = 9
+	PVTObject                       = 10
 )
 
 type Object interface {
 	Type() *ObjectType
 	Id() ObjectId
 	Name() ObjectName
+	Properties(propertyNames ...PropertyName) ([]Property, error)
 	Children(typeNames ...ObjectTypeName) ([]ObjectGroup, error)
-	Properties(typeNames ...PropertyTypeName) ([]Property, error)
 }
 
 type ObjectGroup interface {
 	Type() *ObjectType
 	Objects() []Object
 	Total() int
+}
+
+type Property interface {
+	Type() *PropertyType
+	Value() interface{}
+}
+
+type Dataset interface {
+	Id() DatasetId
+	Root() (Object, error)
+	Find(t ObjectTypeName, n ObjectId) (Object, error)
 }
 
 type ObjectType struct {
@@ -45,19 +55,8 @@ type ObjectType struct {
 	DefaultProperties []*PropertyType
 }
 
-type Property interface {
-	Type() *PropertyType
-	Value() interface{}
-}
-
 type PropertyType struct {
-	Name        PropertyTypeName
-	ValueType   PropertyValueType
+	Name        PropertyName
+	Type        PropertyValueType
 	Description string
-}
-
-type Dataset interface {
-	Id() DatasetId
-	Root() (Object, error)
-	Find(t ObjectTypeName, n ObjectId) (Object, error)
 }

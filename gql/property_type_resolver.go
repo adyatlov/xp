@@ -15,7 +15,7 @@ func (r *propertyTypeResolver) Name() string {
 }
 
 func (r *propertyTypeResolver) ValueType() string {
-	return strings.ToUpper(string(r.t.ValueType))
+	return strings.ToUpper(string(r.t.Type))
 }
 
 func (r *propertyTypeResolver) Description() string {
