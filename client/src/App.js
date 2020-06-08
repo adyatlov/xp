@@ -52,7 +52,7 @@ export default class App extends React.Component {
                             <LoadingSpinner />
                         );
                     }
-                    const {allDatasets, allPlugins} = props;
+                    const {allDatasets, allPlugins, node} = props;
                     if (match.path === "/" && match.isExact) {
                         return (
                             <PageHome datasets={allDatasets} plugins={allPlugins} />
@@ -60,7 +60,7 @@ export default class App extends React.Component {
                     }
                     if (match.path === "/o/:nodeId" && match.isExact) {
                         return (
-                            <PageObject object={props.object}/>
+                            <PageObject object={node}/>
                         )
                     }
                     return (

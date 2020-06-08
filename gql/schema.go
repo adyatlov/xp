@@ -20,6 +20,8 @@ func NewSchema() *Schema {
 
 const SchemaString = `
 enum PropertyValueType {
+    BOOL
+    STRING
     INTEGER
     REAL
     PERCENTAGE
@@ -27,6 +29,7 @@ enum PropertyValueType {
     TIMESTAMP
     TYPE
     FILE
+    OBJECT
 }
 
 schema {

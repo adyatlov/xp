@@ -10,16 +10,16 @@ type (
 )
 
 const (
-	PVTBool       PropertyValueType = 1
-	PVTString                       = 2
-	PVTInteger                      = 3
-	PVTReal                         = 4
-	PVTPercentage                   = 5
-	PVTVersion                      = 6
-	PVTTimestamp                    = 7
-	PVTType                         = 8
-	PVTFile                         = 9
-	PVTObject                       = 10
+	PVTBool       PropertyValueType = 0
+	PVTString                       = 1
+	PVTInteger                      = 2
+	PVTReal                         = 3
+	PVTPercentage                   = 4
+	PVTVersion                      = 5
+	PVTTimestamp                    = 6
+	PVTType                         = 7
+	PVTFile                         = 8
+	PVTObject                       = 9
 )
 
 type Object interface {

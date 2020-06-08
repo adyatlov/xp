@@ -1,10 +1,21 @@
 package gql
 
 import (
-	"strings"
-
 	"github.com/adyatlov/xp/data"
 )
+
+var propertyValueTypes = []string{
+	"BOOL",
+	"STRING",
+	"INTEGER",
+	"REAL",
+	"PERCENTAGE",
+	"VERSION",
+	"TIMESTAMP",
+	"TYPE",
+	"FILE",
+	"OBJECT",
+}
 
 type propertyTypeResolver struct {
 	t *data.PropertyType
@@ -15,7 +26,7 @@ func (r *propertyTypeResolver) Name() string {
 }
 
 func (r *propertyTypeResolver) ValueType() string {
-	return strings.ToUpper(string(r.t.Type))
+	return propertyValueTypes[r.t.Type]
 }
 
 func (r *propertyTypeResolver) Description() string {

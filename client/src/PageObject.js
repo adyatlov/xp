@@ -3,6 +3,10 @@ import graphql from 'babel-plugin-relay/macro';
 import {createFragmentContainer} from 'react-relay';
 
 function PageObject(props) {
+    const {object} = props;
+    if (!object) {
+        return (<div>Object is loading...</div>);
+    }
     return (
         <div>{props.object.name}</div>
     );
