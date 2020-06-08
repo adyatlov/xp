@@ -8,33 +8,63 @@ function PageObject(props) {
         return (<div>Object is loading...</div>);
     }
     return (
-        <Layout>
-            <div>{object.name}</div>
-            <div>
-                <ul>
-                    {object.properties.map((property)=>{
-                        return (
-                            <li key={property.id}>{property.type.name}: {property.value}</li>
-                        );
-                    })}
-                </ul>
-            </div>
-        </Layout>
-    );
-}
-function Layout(props) {
-    return(
-        <div className="row">
-            <div className="col-3">
-                {props.children[0]}
-            </div>
-            <div className="col-9">
-                {props.children[1]}
+        <div className="container-fluid">
+            <div className="row">
+                <div className="col-3">
+                    <LeftPanel object={object}/>
+                </div>
+                <div className="col-9">
+                    Children table goes here
+                </div>
             </div>
         </div>
     );
 }
 
+function LeftPanel(props) {
+    const {object} = props;
+    const {properties, children} = object;
+    return (
+        <div className="card">
+            <div className="card-header">
+                <h5 className="align-middle">{object.name} <span className="badge badge-primary">{object.type.name}</span></h5>
+            </div>
+            <div className="card-body">
+                <PropertyList properties={properties} />
+            </div>
+            <ChildrenGroupList children={children}/>
+        </div>
+    );
+}
+
+function PropertyList(props) {
+    const {properties} = props;
+    return(
+    <table className="table table-sm table-borderless">
+        <tbody>
+        {properties.map(property => (
+            <tr key={property.id}>
+                    <th>{property.type.name} </th>
+                <td>{property.value}</td>
+                </tr>
+        ))}
+        </tbody>
+    </table>
+    );
+}
+
+function ChildrenGroupList(props) {
+    const {children} = props;
+    return(
+        <ul className="list-group list-group-flush">
+            {children.map(group => (
+            <li key={group.id} className="list-group-item d-flex justify-content-between align-items-center">
+                {group.type.pluralName}
+                <span className="badge badge-secondary badge-pill">{group.total}</span>
+            </li>))}
+        </ul>
+    );
+}
 
 export default createFragmentContainer(PageObject, {
     object: graphql`
