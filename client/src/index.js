@@ -28,7 +28,8 @@ ReactDOM.render(
         <Route path={[
             "/o/:nodeId/:childrenTypeName",
             "/o/:nodeId",
-            "/"]} component={App}/>
+            "/"]}
+           component={App}/>
     </Router>,
     document.getElementById('root')
 );

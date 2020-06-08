@@ -104,7 +104,6 @@ type ObjectType {
     pluralName:        String!
     description:       String!
     properties:        [PropertyType!]!
-    defaultProperties: [String!]!
 }
 
 type PropertyType {

@@ -8,9 +8,33 @@ function PageObject(props) {
         return (<div>Object is loading...</div>);
     }
     return (
-        <div>{props.object.name}</div>
+        <Layout>
+            <div>{object.name}</div>
+            <div>
+                <ul>
+                    {object.properties.map((property)=>{
+                        return (
+                            <li key={property.id}>{property.type.name}: {property.value}</li>
+                        );
+                    })}
+                </ul>
+            </div>
+        </Layout>
     );
 }
+function Layout(props) {
+    return(
+        <div className="row">
+            <div className="col-3">
+                {props.children[0]}
+            </div>
+            <div className="col-9">
+                {props.children[1]}
+            </div>
+        </div>
+    );
+}
+
 
 export default createFragmentContainer(PageObject, {
     object: graphql`
@@ -23,6 +47,7 @@ export default createFragmentContainer(PageObject, {
                     description
                 }
                 properties {
+                    id
                     value
                     type {
                         name
@@ -31,6 +56,7 @@ export default createFragmentContainer(PageObject, {
                     }
                 }
                 children {
+                    id
                     type {
                         name
                         pluralName
@@ -42,4 +68,5 @@ export default createFragmentContainer(PageObject, {
         }
     `
 });
+
 

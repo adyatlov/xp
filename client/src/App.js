@@ -1,5 +1,5 @@
 import React from 'react';
-import {useLocation} from "react-router-dom";
+import {useLocation, Route, Switch } from "react-router-dom";
 import {QueryRenderer} from 'react-relay';
 import graphql from 'babel-plugin-relay/macro';
 
@@ -53,20 +53,20 @@ export default class App extends React.Component {
                         );
                     }
                     const {allDatasets, allPlugins, node} = props;
-                    if (match.path === "/" && match.isExact) {
-                        return (
-                            <PageHome datasets={allDatasets} plugins={allPlugins} />
-                        );
-                    }
-                    if (match.path === "/o/:nodeId" && match.isExact) {
-                        return (
-                            <PageObject object={node}/>
-                        )
-                    }
-                    return (
-                        <PageHome datasets={allDatasets} plugins={allPlugins}>
-                            <Error404 />
-                        </PageHome>
+                    return(
+                        <Switch>
+                            <Route path="/" exact>
+                                <PageHome datasets={allDatasets} plugins={allPlugins} />
+                            </Route>
+                            <Route path="/o/:nodeId">
+                                <PageObject object={node}/>
+                            </Route>
+                            <Route>
+                                <PageHome datasets={allDatasets} plugins={allPlugins}>
+                                    <Error404 />
+                                </PageHome>
+                            </Route>
+                        </Switch>
                     );
                 }}
             />

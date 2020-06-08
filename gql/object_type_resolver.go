@@ -25,11 +25,3 @@ func (r *objectTypeResolver) Properties() []*propertyTypeResolver {
 	}
 	return resolvers
 }
-
-func (r *objectTypeResolver) DefaultProperties() []string {
-	properties := make([]string, 0, len(r.t.DefaultProperties))
-	for _, property := range r.t.DefaultProperties {
-		properties = append(properties, string(property.Name))
-	}
-	return properties
-}

@@ -48,11 +48,10 @@ type Dataset interface {
 }
 
 type ObjectType struct {
-	Name              ObjectTypeName
-	PluralName        string
-	Description       string
-	Properties        []*PropertyType
-	DefaultProperties []*PropertyType
+	Name        ObjectTypeName
+	PluralName  string
+	Description string
+	Properties  []*PropertyType
 }
 
 type PropertyType struct {

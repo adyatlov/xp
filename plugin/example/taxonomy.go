@@ -12,12 +12,6 @@ var TCompany = &data.ObjectType{
 		PIncome,
 		PExpenses,
 	},
-	DefaultProperties: []*data.PropertyType{
-		PEstablished,
-		PCompanyForm,
-		PIncome,
-		PExpenses,
-	},
 }
 
 var TDivision = &data.ObjectType{
@@ -25,11 +19,6 @@ var TDivision = &data.ObjectType{
 	PluralName:  "divisions",
 	Description: "business unit",
 	Properties: []*data.PropertyType{
-		PEstablished,
-		PIncome,
-		PExpenses,
-	},
-	DefaultProperties: []*data.PropertyType{
 		PEstablished,
 		PIncome,
 		PExpenses,
@@ -48,11 +37,6 @@ var TEmployee = &data.ObjectType{
 		PFirstDay,
 		PIncome,
 		PEmail,
-	},
-	DefaultProperties: []*data.PropertyType{
-		PPosition,
-		PFirstDay,
-		PIncome,
 	},
 }
 
