@@ -47,8 +47,8 @@ type Object implements Node {
     id:								  ID!
     type:                             ObjectType!
     name:                             String!
-    children(typeNames: [String!]):   [ObjectGroup!]!
-    properties(typeNames: [String!]): [Property!]!
+    children(typeNames: [String!]):   [ObjectGroup]!
+    properties(typeNames: [String!]): [Property]!
 }
 
 type Property implements Node {

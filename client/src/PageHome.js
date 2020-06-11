@@ -1,10 +1,26 @@
 import React from "react";
+import graphql from "babel-plugin-relay/macro";
+import {QueryRenderer} from "react-relay";
 
+import environment from "./relayEnvironment";
 import DatasetAdder from "./DatasetAdder";
 import DatasetList from "./DatasetList";
 import PluginList from "./PluginList";
+import LoadingSpinner from "./LoadingSpinner";
+import Error from "./Error";
 
-export default function PageHome(props) {
+const query = graphql`
+    query PageHomeQuery {
+        allDatasets {
+            ...DatasetList_datasets
+        }
+        allPlugins {
+            ...PluginList_plugins
+        }
+    }
+`;
+
+function PageHome(props) {
     const {datasets, plugins} = props;
     return(
         <div id="root" className="container pt-4">
@@ -27,3 +43,28 @@ export default function PageHome(props) {
     );
 }
 
+export default function PageHomeQuery() {
+    return(
+        <QueryRenderer
+            environment={environment}
+            query={query}
+            render={({error, props}) => {
+                if (error) {
+                    console.error(error);
+                    return(
+                        <Error text={error.message} />
+                    );
+                }
+                if (!props) {
+                    return (
+                        <LoadingSpinner />
+                    );
+                }
+                const {allDatasets, allPlugins} = props;
+                return(
+                    <PageHome datasets={allDatasets} plugins={allPlugins} />
+                );
+            }}
+        />
+    );
+}

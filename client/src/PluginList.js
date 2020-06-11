@@ -8,7 +8,7 @@ function PluginList(props) {
         return <div>Loading plugin list...</div>
     }
     return(
-        <table className="table table-hover">
+        <table className="table">
             <thead>
             <tr>
                 <th scope="col">Name</th>

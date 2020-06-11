@@ -21,7 +21,12 @@ func (r *objectGroupResolver) Type() *objectTypeResolver {
 func (r *objectGroupResolver) Objects() []*objectResolver {
 	objectResolvers := make([]*objectResolver, 0, len(r.group.Objects()))
 	for _, object := range r.group.Objects() {
-		objectResolvers = append(objectResolvers, &objectResolver{object: object})
+		id := encodeId(objectId{
+			datasetId:      decodeId(r.id).(objectGroupId).datasetId,
+			ObjectTypeName: object.Type().Name,
+			ObjectId:       object.Id(),
+		})
+		objectResolvers = append(objectResolvers, &objectResolver{id: id, object: object})
 	}
 	return objectResolvers
 }

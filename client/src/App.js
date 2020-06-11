@@ -1,29 +1,9 @@
 import React from 'react';
 import {useLocation, Route, Switch } from "react-router-dom";
-import {QueryRenderer} from 'react-relay';
-import graphql from 'babel-plugin-relay/macro';
 
-import environment from "./relayEnvironment";
-import subscribeDatasetsChanged from "./subscribeDatasetsChanged";
-
-import Error from "./Error";
-import LoadingSpinner from "./LoadingSpinner";
 import PageHome from "./PageHome";
 import PageObject from "./PageObject";
-
-const query = graphql`
-    query AppQuery($nodeId: ID) {
-        node(id: $nodeId) {
-            ...PageObject_object
-        }
-        allDatasets {
-            ...DatasetList_datasets
-        }
-        allPlugins {
-            ...PluginList_plugins
-        }
-    }
-`;
+import subscribeDatasetsChanged from "./subscribeDatasetsChanged";
 
 export default class App extends React.Component {
     componentDidMount() {
@@ -31,45 +11,18 @@ export default class App extends React.Component {
     }
 
     render() {
-        const {match} = this.props;
         return(
-            <QueryRenderer
-                environment={environment}
-                query={query}
-                fetchPolicy={"store-and-network"}
-                variables={{
-                    nodeId: match.params["nodeId"],
-                }}
-                render={({error, props}) => {
-                    if (error) {
-                        console.error(error);
-                        return(
-                            <Error text={error.message} />
-                        );
-                    }
-                    if (!props) {
-                        return (
-                            <LoadingSpinner />
-                        );
-                    }
-                    const {allDatasets, allPlugins, node} = props;
-                    return(
-                        <Switch>
-                            <Route path="/" exact>
-                                <PageHome datasets={allDatasets} plugins={allPlugins} />
-                            </Route>
-                            <Route path="/o/:nodeId">
-                                <PageObject object={node}/>
-                            </Route>
-                            <Route>
-                                <PageHome datasets={allDatasets} plugins={allPlugins}>
-                                    <Error404 />
-                                </PageHome>
-                            </Route>
-                        </Switch>
-                    );
-                }}
-            />
+            <Switch>
+                <Route path="/" exact>
+                    <PageHome/>
+                </Route>
+                <Route path={["/o/:nodeId/:childTypeNames", "/o/:nodeId"]}>
+                    <PageObject/>
+                </Route>
+                <Route>
+                    <Error404 />
+                </Route>
+            </Switch>
         );
     }
 }

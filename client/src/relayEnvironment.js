@@ -8,11 +8,6 @@ function fetchQuery(
     // DEBUG:
     // console.log(operation.text);
     // console.log(variables);
-    // let debug = JSON.stringify({
-    //     query: operation.text, // GraphQL text from input
-    //     variables,
-    // });
-    // console.log(debug);
     return fetch("http://"+hostPath, {
         method: 'POST',
         headers: {

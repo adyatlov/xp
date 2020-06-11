@@ -9,6 +9,7 @@ function DatasetList(props) {
     if (!props.datasets) {
         return <div>Loading dataset list...</div>
     }
+    const {datasets} = props;
     return(
         <table className="table table-hover">
             <thead>
@@ -22,14 +23,14 @@ function DatasetList(props) {
             </tr>
             </thead>
             <tbody>
-            {props.datasets.map((dataset) => {
+            {datasets.map((dataset) => {
                 let added = parseInt(dataset.added) * 1000;
                 added = new Date(added);
                 added = added.toLocaleString();
                 return(
                     <tr key={dataset.id}>
                         <td className="text-nowrap">
-                            <ObjectLink objectId={dataset.root.id}>
+                            <ObjectLink nodeId={dataset.root.id}>
                                 {dataset.root.name}
                             </ObjectLink>
                         </td>
