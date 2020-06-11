@@ -24,7 +24,7 @@ func (r *objectResolver) Name() string {
 
 func (r *objectResolver) Children(args struct {
 	TypeNames *[]string
-}) ([]*objectGroupResolver, error) {
+}) ([]*childrenGroupResolver, error) {
 	var typeNames []data.ObjectTypeName
 	if args.TypeNames != nil {
 		typeNames = make([]data.ObjectTypeName, 0, len(*args.TypeNames))
@@ -36,13 +36,13 @@ func (r *objectResolver) Children(args struct {
 	if err != nil {
 		return nil, err
 	}
-	resolvers := make([]*objectGroupResolver, 0, len(groups))
+	resolvers := make([]*childrenGroupResolver, 0, len(groups))
 	for _, group := range groups {
-		id := encodeId(objectGroupId{
+		id := encodeId(childrenGroupId{
 			objectId:      decodeId(r.id).(objectId),
 			GroupTypeName: group.Type().Name,
 		})
-		resolvers = append(resolvers, &objectGroupResolver{id: id, group: group})
+		resolvers = append(resolvers, &childrenGroupResolver{id: id, group: group})
 	}
 	return resolvers, nil
 }

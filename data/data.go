@@ -27,10 +27,10 @@ type Object interface {
 	Id() ObjectId
 	Name() ObjectName
 	Properties(propertyNames ...PropertyName) ([]Property, error)
-	Children(typeNames ...ObjectTypeName) ([]ObjectGroup, error)
+	Children(typeNames ...ObjectTypeName) ([]ChildrenGroup, error)
 }
 
-type ObjectGroup interface {
+type ChildrenGroup interface {
 	Type() *ObjectType
 	Objects() []Object
 	Total() int

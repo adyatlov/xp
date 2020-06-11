@@ -15,7 +15,7 @@ class ObjectSummaryPanel extends React.Component {
                 </div>
                 <MetricList metrics={o.metrics}/>
                 {hasChildren &&
-                <ObjectGroupList objectGroups={o.children} childrenTypeName={t}/>
+                <ChildrenGroupList childrenGroups={o.children} childrenTypeName={t}/>
                 }
             </div>
         )
@@ -42,8 +42,8 @@ function MetricList(props) {
     );
 }
 
-function ObjectGroupList(props) {
-    const groups = props.objectGroups;
+function ChildrenGroupList(props) {
+    const groups = props.childrenGroups;
     return (
         <ul className="list-group list-group-flush">
             {groups.map(g => (

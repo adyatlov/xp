@@ -20,8 +20,8 @@ func (r *nodeResolver) ToProperty() (resolver *propertyResolver, ok bool) {
 	return
 }
 
-func (r *nodeResolver) ToObjectGroup() (resolver *objectGroupResolver, ok bool) {
-	resolver, ok = r.node.(*objectGroupResolver)
+func (r *nodeResolver) ToChildrenGroup() (resolver *childrenGroupResolver, ok bool) {
+	resolver, ok = r.node.(*childrenGroupResolver)
 	return
 }
 

@@ -11,7 +11,7 @@ import (
 // Check implementation
 var _ data.Object = &Object{}
 var _ data.Property = &Property{}
-var _ data.ObjectGroup = &ObjectGroup{}
+var _ data.ChildrenGroup = &ChildrenGroup{}
 var _ data.Dataset = &Dataset{}
 var _ plugin.Plugin = &Plugin{}
 
@@ -20,13 +20,13 @@ type Object struct {
 	id         data.ObjectId
 	name       data.ObjectName
 	properties map[data.PropertyName]data.Property
-	children   map[data.ObjectTypeName]*ObjectGroup
+	children   map[data.ObjectTypeName]*ChildrenGroup
 }
 
 func NewObject(t *data.ObjectType, id data.ObjectId, name data.ObjectName) *Object {
 	object := &Object{t: t, id: id, name: name}
 	object.properties = make(map[data.PropertyName]data.Property)
-	object.children = make(map[data.ObjectTypeName]*ObjectGroup)
+	object.children = make(map[data.ObjectTypeName]*ChildrenGroup)
 	return object
 }
 
@@ -41,7 +41,7 @@ func (o *Object) AddProperty(property data.Property) {
 func (o *Object) AddChild(child data.Object) {
 	group := o.children[child.Type().Name]
 	if group == nil {
-		group = NewObjectGroup(child.Type())
+		group = NewChildrenGroup(child.Type())
 		o.children[child.Type().Name] = group
 	}
 	group.AddObject(child)
@@ -59,16 +59,16 @@ func (o *Object) Name() data.ObjectName {
 	return o.name
 }
 
-func (o *Object) Children(typeNames ...data.ObjectTypeName) ([]data.ObjectGroup, error) {
-	var groups []data.ObjectGroup
+func (o *Object) Children(typeNames ...data.ObjectTypeName) ([]data.ChildrenGroup, error) {
+	var groups []data.ChildrenGroup
 	if len(typeNames) == 0 {
-		groups = make([]data.ObjectGroup, 0, len(o.children))
+		groups = make([]data.ChildrenGroup, 0, len(o.children))
 		for _, g := range o.children {
 			groups = append(groups, g)
 		}
 		return groups, nil
 	}
-	groups = make([]data.ObjectGroup, 0, len(typeNames))
+	groups = make([]data.ChildrenGroup, 0, len(typeNames))
 	for _, typeName := range typeNames {
 		group, ok := o.children[typeName]
 		if !ok {
@@ -201,18 +201,18 @@ func (d *Dataset) AddObject(o data.Object) {
 	objects[o.Id()] = o
 }
 
-type ObjectGroup struct {
+type ChildrenGroup struct {
 	objects    []data.Object
 	objectType *data.ObjectType
 }
 
-func NewObjectGroup(objectType *data.ObjectType) *ObjectGroup {
-	group := &ObjectGroup{objectType: objectType}
+func NewChildrenGroup(objectType *data.ObjectType) *ChildrenGroup {
+	group := &ChildrenGroup{objectType: objectType}
 	group.objects = make([]data.Object, 0)
 	return group
 }
 
-func (o *ObjectGroup) AddObject(object data.Object) {
+func (o *ChildrenGroup) AddObject(object data.Object) {
 	if o.objectType != object.Type() {
 		panic(fmt.Sprintf("wrong object type, expected %v got %v",
 			o.objectType, object.Type()))
@@ -220,14 +220,14 @@ func (o *ObjectGroup) AddObject(object data.Object) {
 	o.objects = append(o.objects, object)
 }
 
-func (o *ObjectGroup) Type() *data.ObjectType {
+func (o *ChildrenGroup) Type() *data.ObjectType {
 	return o.objectType
 }
 
-func (o *ObjectGroup) Objects() []data.Object {
+func (o *ChildrenGroup) Objects() []data.Object {
 	return o.objects
 }
 
-func (o *ObjectGroup) Total() int {
+func (o *ChildrenGroup) Total() int {
 	return len(o.objects)
 }

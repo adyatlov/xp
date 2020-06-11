@@ -43,7 +43,7 @@ func (q *Query) Node(args struct {
 			return nil, err
 		}
 		return &nodeResolver{&propertyResolver{id: *args.Id, property: properties[0]}}, nil
-	case objectGroupId:
+	case childrenGroupId:
 		dataset, err := q.datasets.Get(id.datasetId)
 		if err != nil {
 			return nil, err
@@ -56,7 +56,7 @@ func (q *Query) Node(args struct {
 		if err != nil {
 			return nil, err
 		}
-		return &nodeResolver{&objectGroupResolver{id: *args.Id, group: groups[0]}}, nil
+		return &nodeResolver{&childrenGroupResolver{id: *args.Id, group: groups[0]}}, nil
 	case datasetId:
 		dataset, err := q.datasets.Get(id)
 		if err != nil {

@@ -42,7 +42,7 @@ function ChildrenPropertiesList(props) {
 
 export default createFragmentContainer(ChildrenPropertiesList, {
     childrenProperties: graphql`
-        fragment ChildrenPropertiesList_childrenProperties on ObjectGroup@relay(plural: true) {
+        fragment ChildrenPropertiesList_childrenProperties on ChildrenGroup@relay(plural: true) {
             type {
                 name
                 properties {

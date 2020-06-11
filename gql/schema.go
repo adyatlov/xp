@@ -68,7 +68,7 @@ type Object implements Node {
     id:								  ID!
     type:                             ObjectType!
     name:                             String!
-    children(typeNames: [String!]):   [ObjectGroup!]!
+    children(typeNames: [String!]):   [ChildrenGroup!]!
     properties(typeNames: [String!]): [Property!]!
 }
 
@@ -78,7 +78,7 @@ type Property implements Node {
     value: String!
 }
 
-type ObjectGroup implements Node {
+type ChildrenGroup implements Node {
     id:      ID!
     type:    ObjectType!
     objects: [Object!]!

@@ -31,7 +31,7 @@ func encodeId(id interface{}) graphql.ID {
 	case propertyId:
 		return joinAndEncodeParts("p",
 			string(id.PluginName), string(id.DatasetId), string(id.ObjectTypeName), string(id.ObjectId), string(id.PropertyName))
-	case objectGroupId:
+	case childrenGroupId:
 		return joinAndEncodeParts("g",
 			string(id.PluginName), string(id.DatasetId), string(id.ObjectTypeName), string(id.ObjectId), string(id.GroupTypeName))
 	case datasetId:
@@ -53,7 +53,7 @@ func decodeId(id graphql.ID) interface{} {
 	case "p":
 		return decodePropertyId(parts)
 	case "g":
-		return decodeObjectGroupId(parts)
+		return decodeChildrenGroupId(parts)
 	case "d":
 		return decodeDatasetId(parts)
 	case "pl":
@@ -77,8 +77,8 @@ func decodePropertyId(parts []string) propertyId {
 	}
 }
 
-func decodeObjectGroupId(parts []string) objectGroupId {
-	return objectGroupId{
+func decodeChildrenGroupId(parts []string) childrenGroupId {
+	return childrenGroupId{
 		objectId:      decodeObjectId(parts),
 		GroupTypeName: data.ObjectTypeName(parts[5]),
 	}
@@ -102,7 +102,7 @@ type propertyId struct {
 	data.PropertyName
 }
 
-type objectGroupId struct {
+type childrenGroupId struct {
 	objectId
 	GroupTypeName data.ObjectTypeName
 }
