@@ -20,11 +20,15 @@ const query = graphql`
                     description
                 }
                 properties {
-                    id
-                    value
-                    type {
-                        name
-                        description
+                    edges {
+                       node {
+                           id
+                           value
+                           type {
+                               name
+                               description
+                           }
+                       }
                     }
                 }
                 children {
@@ -34,7 +38,7 @@ const query = graphql`
                         pluralName
                         description
                     }
-                    total
+                    totalCount
                 }
                 selectedChildren: children(typeNames: $childTypeNames) {
                     ...ChildrenPropertiesList_childrenProperties

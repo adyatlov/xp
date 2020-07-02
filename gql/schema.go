@@ -97,7 +97,7 @@ type ObjectGroup {
     id:   ID!
     type: ObjectType!
     totalCount: Int!
-    Objects(
+    objects(
         first:      Int
         after:      ID
     ): ObjectConnection
@@ -146,5 +146,4 @@ type PropertyType {
     valueType:   PropertyValueType!
     description: String!
 }
-
 `

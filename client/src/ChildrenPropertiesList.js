@@ -50,11 +50,19 @@ export default createFragmentContainer(ChildrenPropertiesList, {
                 }
             }
             objects {
-                id
-                name
-                properties {
-                    id
-                    value
+                edges {
+                    node {
+                        id
+                        name
+                        properties {
+                            edges {
+                                node {
+                                    id
+                                    value
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

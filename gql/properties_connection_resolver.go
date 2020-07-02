@@ -18,9 +18,6 @@ func newPropertiesConnectionResolver(
 	typeNames *[]string,
 	first *int32,
 	after *graphql.ID) (*propertiesConnectionResolver, error) {
-	if first == nil || *first <= 0 {
-		return nil, nil
-	}
 	var names []data.PropertyName
 	if typeNames == nil || len(*typeNames) == 0 {
 		names = object.Type().PropertyNames() // Return all properties
@@ -30,7 +27,7 @@ func newPropertiesConnectionResolver(
 			names = append(names, data.PropertyName(name))
 		}
 	}
-	afterIndex := -1
+	from := 0
 	// Find if object has a property to which "after" is pointing.
 	if after != nil {
 		afterId, err := decodePropertyId(*after)
@@ -43,19 +40,21 @@ func newPropertiesConnectionResolver(
 		}
 		for i, name := range names {
 			if afterId.PropertyName == name {
-				afterIndex = i
+				from = i + 1
 				goto Paging
 			}
 		}
 	}
 Paging:
-	low := afterIndex + 1
-	high := low + int(*first)
-	if high > len(names) {
-		high = len(names)
+	to := from + len(names)
+	if first != nil {
+		to = from + int(*first)
+		if to > len(names) {
+			to = len(names)
+		}
 	}
-	hasNextPage := high < len(names)
-	names = names[low:high]
+	hasNextPage := to < len(names)
+	names = names[from:to]
 	if len(names) == 0 {
 		return nil, nil
 	}

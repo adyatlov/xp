@@ -12,6 +12,10 @@ var TCompany = &data.ObjectType{
 		PIncome,
 		PExpenses,
 	},
+	ChildTypes: []*data.ObjectType{
+		TEmployee,
+		TDivision,
+	},
 }
 
 var TDivision = &data.ObjectType{
@@ -22,6 +26,9 @@ var TDivision = &data.ObjectType{
 		PEstablished,
 		PIncome,
 		PExpenses,
+	},
+	ChildTypes: []*data.ObjectType{
+		TEmployee,
 	},
 }
 

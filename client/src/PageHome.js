@@ -11,10 +11,10 @@ import Error from "./Error";
 
 const query = graphql`
     query PageHomeQuery {
-        allDatasets {
+        datasets {
             ...DatasetList_datasets
         }
-        allPlugins {
+        plugins {
             ...PluginList_plugins
         }
     }
@@ -29,7 +29,7 @@ function PageHome(props) {
             {props.children}
             <p className="text-secondary">Please open a new dataset:</p>
             <DatasetAdder/>
-            {datasets.length > 0 &&
+            {datasets && datasets.length > 0 &&
             <>
                 <p className="mt-3 text-secondary">or choose an already loaded one:</p>
                 <h2>Datasets</h2>
@@ -60,9 +60,9 @@ export default function PageHomeQuery() {
                         <LoadingSpinner />
                     );
                 }
-                const {allDatasets, allPlugins} = props;
+                const {datasets, plugins} = props;
                 return(
-                    <PageHome datasets={allDatasets} plugins={allPlugins} />
+                    <PageHome datasets={datasets} plugins={plugins} />
                 );
             }}
         />

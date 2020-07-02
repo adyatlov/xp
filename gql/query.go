@@ -2,6 +2,7 @@ package gql
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/adyatlov/xp/data"
 
@@ -109,6 +110,10 @@ func (q *Query) Datasets() *[]datasetResolver {
 			dataset: dataset,
 		})
 	}
+	sort.Slice(resolvers, func(i, j int) bool {
+		return resolvers[i].dataset.Added.Before(
+			resolvers[j].dataset.Added)
+	})
 	return &resolvers
 }
 
@@ -118,6 +123,9 @@ func (q *Query) Plugins() *[]pluginResolver {
 	for _, p := range plugins {
 		resolvers = append(resolvers, pluginResolver{plugin: p})
 	}
+	sort.Slice(resolvers, func(i, j int) bool {
+		return resolvers[i].plugin.Name < resolvers[j].plugin.Name
+	})
 	return &resolvers
 }
 

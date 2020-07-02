@@ -41,7 +41,7 @@ export default function subscribeDatasetsChanged() {
             updater: (store) => {
                 const datasetUpdated = store.getRoot().getLinkedRecord("datasetUpdated");
                 const eventType = datasetUpdated.getValue("eventType") ;
-                let datasetRecords = store.getRoot().getLinkedRecords("allDatasets");
+                let datasetRecords = store.getRoot().getLinkedRecords("datasets");
                 switch (eventType) {
                     case "added":
                         const datasetRecord = datasetUpdated.getLinkedRecord("dataset");
@@ -57,7 +57,7 @@ export default function subscribeDatasetsChanged() {
                         console.warn("Unknown eventType: ", eventType);
                         return
                 }
-                store.getRoot().setLinkedRecords(datasetRecords, "allDatasets")
+                store.getRoot().setLinkedRecords(datasetRecords, "datasets")
             },
         }
     );

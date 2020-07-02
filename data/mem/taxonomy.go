@@ -35,8 +35,8 @@ func (o *Object) AddProperty(n data.PropertyName, p interface{}) {
 }
 
 func (o *Object) assertPropertyCompatible(name data.PropertyName, p interface{}) {
-	if _, ok := o.properties[name]; !ok {
-		panic(fmt.Sprintf("object %v of type %v already has property %v",
+	if _, ok := o.properties[name]; ok {
+		panic(fmt.Sprintf("object %q of type %q already has property %q",
 			o.id, o.t.Name, name))
 	}
 	t := o.Type().PropertyType(name)
@@ -67,11 +67,11 @@ func (o *Object) assertChildCompatible(child data.Object) {
 		}
 	}
 	if !typeIsCorrect {
-		panic(fmt.Sprintf("object %v of type %v cannot have child with type %v",
+		panic(fmt.Sprintf("object %q of type %q cannot have child with type %q",
 			o.name, o.t.Name, child.Type().Name))
 	}
 	if _, ok := o.children[child.Type().Name][child.Id()]; ok {
-		panic(fmt.Sprintf("object %v of type %v already has a child with id %v",
+		panic(fmt.Sprintf("object %q of type %q already has a child with id %q",
 			o.id, o.t.Name, child.Id()))
 	}
 }

@@ -14,16 +14,13 @@ func newObjectConnectionResolver(
 	g data.ObjectGroup,
 	first *int32,
 	after *graphql.ID) (*objectConnectionResolver, error) {
-	if first == nil || *first <= 0 {
-		return nil, nil
-	}
 	objects := objectPool.Get().(*[]data.Object)
 	defer objectPool.Put(objects)
 	*objects = (*objects)[:0]
 	if err := g.All(objects); err != nil {
 		return nil, err
 	}
-	afterIndex := -1
+	from := 0
 	edges := make([]*objectEdgeResolver, 0, len(*objects))
 	if after != nil {
 		for i, o := range *objects {
@@ -38,16 +35,18 @@ func newObjectConnectionResolver(
 				node:   &objectResolver{objectId: oId, object: o},
 			})
 			if cursor == *after {
-				afterIndex = i
+				from = i + 1
 			}
 		}
 	}
-	low := afterIndex + 1
-	high := low + int(*first)
-	if high > len(*objects) {
-		high = len(*objects)
+	to := len(edges)
+	if first != nil {
+		to = from + int(*first)
+		if to > len(edges) {
+			to = len(edges)
+		}
 	}
-	edges = edges[low:high]
+	edges = edges[from:to]
 	return &objectConnectionResolver{edges: edges}, nil
 }
 
