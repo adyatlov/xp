@@ -2,3 +2,5 @@
 xp
 packrd/
 *-packr.go
+tmp
+log.txt
