@@ -6,68 +6,55 @@ import (
 )
 
 type objectResolver struct {
-	id     graphql.ID
-	object data.Object
+	objectId objectId
+	object   data.Object
+}
+
+func (r *objectResolver) Id() graphql.ID {
+	return encodeId(r.objectId)
 }
 
 func (r *objectResolver) Type() *objectTypeResolver {
 	return &objectTypeResolver{r.object.Type()}
 }
 
-func (r *objectResolver) Id() graphql.ID {
-	return r.id
-}
-
 func (r *objectResolver) Name() string {
 	return string(r.object.Name())
 }
 
-func (r *objectResolver) Children(args struct {
-	TypeNames *[]string
-}) ([]*childrenGroupResolver, error) {
-	var typeNames []data.ObjectTypeName
-	if args.TypeNames != nil {
-		typeNames = make([]data.ObjectTypeName, 0, len(*args.TypeNames))
-		for _, typeName := range *args.TypeNames {
-			typeNames = append(typeNames, data.ObjectTypeName(typeName))
-		}
-	}
-	groups, err := r.object.Children(typeNames...)
-	if err != nil {
-		return nil, err
-	}
-	resolvers := make([]*childrenGroupResolver, 0, len(groups))
-	for _, group := range groups {
-		id := encodeId(childrenGroupId{
-			objectId:      decodeId(r.id).(objectId),
-			GroupTypeName: group.Type().Name,
-		})
-		resolvers = append(resolvers, &childrenGroupResolver{id: id, group: group})
-	}
-	return resolvers, nil
+func (r *objectResolver) Properties(
+	args struct {
+		TypeNames *[]string
+		First     *int32
+		After     *graphql.ID
+	}) (*propertiesConnectionResolver, error) {
+	return newPropertiesConnectionResolver(
+		r.objectId,
+		r.object,
+		args.TypeNames,
+		args.First,
+		args.After,
+	)
 }
 
-func (r *objectResolver) Properties(args struct {
-	TypeNames *[]string
-}) ([]*propertyResolver, error) {
-	var typeNames []data.PropertyName
-	if args.TypeNames != nil {
-		typeNames = make([]data.PropertyName, 0, len(*args.TypeNames))
-		for _, typeName := range *args.TypeNames {
-			typeNames = append(typeNames, data.PropertyName(typeName))
+func (r *objectResolver) Children(args struct{ TypeNames *[]string }) *[]*objectGroupResolver {
+	var names []data.ObjectTypeName
+	if args.TypeNames == nil || len(*args.TypeNames) == 0 {
+		names = r.object.Type().ChildTypeNames()
+	} else {
+		names = make([]data.ObjectTypeName, 0, len(*args.TypeNames))
+		for _, name := range *args.TypeNames {
+			names = append(names, data.ObjectTypeName(name))
 		}
 	}
-	properties, err := r.object.Properties(typeNames...)
-	if err != nil {
-		return nil, err
+	objectGroups := make([]*objectGroupResolver, 0, len(names))
+	for _, name := range names {
+		objectGroup := r.object.Children(name)
+		if objectGroup == nil {
+			objectGroups = append(objectGroups, nil)
+			continue
+		}
+		objectGroups = append(objectGroups, &objectGroupResolver{g: objectGroup})
 	}
-	resolvers := make([]*propertyResolver, 0, len(properties))
-	for _, property := range properties {
-		id := encodeId(propertyId{
-			objectId:     decodeId(r.id).(objectId),
-			PropertyName: property.Type().Name,
-		})
-		resolvers = append(resolvers, &propertyResolver{id: id, property: property})
-	}
-	return resolvers, nil
+	return &objectGroups
 }

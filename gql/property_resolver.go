@@ -10,8 +10,10 @@ import (
 )
 
 type propertyResolver struct {
-	property data.Property
-	id       graphql.ID
+	dId datasetId
+	t   *data.PropertyType
+	v   interface{}
+	id  graphql.ID
 }
 
 func (r *propertyResolver) Id() graphql.ID {
@@ -19,12 +21,12 @@ func (r *propertyResolver) Id() graphql.ID {
 }
 
 func (r *propertyResolver) Type() *propertyTypeResolver {
-	return &propertyTypeResolver{r.property.Type()}
+	return &propertyTypeResolver{r.t}
 }
 
 func (r *propertyResolver) Value() (value string) {
-	v := r.property.Value()
-	switch r.property.Type().Type {
+	v := r.v
+	switch r.t.ValueType {
 	case data.PVTBool:
 		value = strconv.FormatBool(v.(bool))
 	case data.PVTString:
@@ -45,15 +47,14 @@ func (r *propertyResolver) Value() (value string) {
 		value = v.(string)
 	case data.PVTObject:
 		o := v.(data.Object)
-		pId := decodeId(r.id).(propertyId)
 		oId := encodeId(objectId{
-			datasetId:      pId.datasetId,
+			datasetId:      r.dId,
 			ObjectTypeName: o.Type().Name,
 			ObjectId:       o.Id(),
 		})
 		value = string(oId)
 	default:
-		panic("unknown property value type: " + strconv.Itoa(int(r.property.Type().Type)))
+		panic("unknown property value type: " + strconv.Itoa(int(r.t.ValueType)))
 	}
 	return
 }

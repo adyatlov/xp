@@ -1,6 +1,6 @@
 package server
 
 import (
-	_ "github.com/adyatlov/xp/plugin/dcos"
-	_ "github.com/adyatlov/xp/plugin/example"
+	_ "github.com/adyatlov/xp/plugins/dcos"
+	_ "github.com/adyatlov/xp/plugins/example"
 )

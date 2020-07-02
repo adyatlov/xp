@@ -6,11 +6,10 @@ import (
 	"time"
 
 	"github.com/adyatlov/xp/data"
-	"github.com/adyatlov/xp/plugin"
 )
 
 type DatasetInfo struct {
-	plugin.Plugin
+	*data.Plugin
 	data.Dataset
 	Url   string
 	Added time.Time
@@ -31,7 +30,7 @@ func NewDatasetRegistry() *datasetRegistry {
 func (r *datasetRegistry) Add(dataset DatasetInfo) error {
 	r.datasetsMu.Lock()
 	defer r.datasetsMu.Unlock()
-	id := datasetId{PluginName: dataset.Plugin.Name(), DatasetId: dataset.Id()}
+	id := newDatasetId(dataset.Plugin.Name, dataset.Id())
 	if _, ok := r.datasets[id]; ok {
 		return fmt.Errorf("dataset %v already opened", dataset.Id())
 	}

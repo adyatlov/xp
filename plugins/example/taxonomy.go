@@ -6,7 +6,7 @@ var TCompany = &data.ObjectType{
 	Name:        "company",
 	PluralName:  "companies",
 	Description: "Commercial business",
-	Properties: []*data.PropertyType{
+	PropertyTypes: []*data.PropertyType{
 		PEstablished,
 		PCompanyForm,
 		PIncome,
@@ -18,7 +18,7 @@ var TDivision = &data.ObjectType{
 	Name:        "division",
 	PluralName:  "divisions",
 	Description: "business unit",
-	Properties: []*data.PropertyType{
+	PropertyTypes: []*data.PropertyType{
 		PEstablished,
 		PIncome,
 		PExpenses,
@@ -29,7 +29,7 @@ var TEmployee = &data.ObjectType{
 	Name:        "employee",
 	PluralName:  "employees",
 	Description: "person employed for wages or salary",
-	Properties: []*data.PropertyType{
+	PropertyTypes: []*data.PropertyType{
 		PPosition,
 		PFirstName,
 		PLastName,
@@ -42,60 +42,60 @@ var TEmployee = &data.ObjectType{
 
 var PEstablished = &data.PropertyType{
 	Name:        "established",
-	Type:        data.PVTTimestamp,
+	ValueType:   data.PVTTimestamp,
 	Description: "day of foundation",
 }
 
 var PCompanyForm = &data.PropertyType{
 	Name:        "company_form",
-	Type:        data.PVTType,
+	ValueType:   data.PVTType,
 	Description: "type of business",
 }
 
 var PIncome = &data.PropertyType{
 	Name:        "income",
-	Type:        data.PVTInteger,
+	ValueType:   data.PVTInteger,
 	Description: "money received yearly",
 }
 
 var PExpenses = &data.PropertyType{
 	Name:        "expenses",
-	Type:        data.PVTInteger,
+	ValueType:   data.PVTInteger,
 	Description: "money spent yearly",
 }
 
 var PBirthDay = &data.PropertyType{
 	Name:        "birth_day",
-	Type:        data.PVTTimestamp,
+	ValueType:   data.PVTTimestamp,
 	Description: "day of birth",
 }
 
 var PFirstDay = &data.PropertyType{
 	Name:        "first_day",
-	Type:        data.PVTTimestamp,
+	ValueType:   data.PVTTimestamp,
 	Description: "employment begins",
 }
 
 var PPosition = &data.PropertyType{
 	Name:        "position",
-	Type:        data.PVTType,
+	ValueType:   data.PVTType,
 	Description: "job title",
 }
 
 var PEmail = &data.PropertyType{
 	Name:        "email",
-	Type:        data.PVTString,
+	ValueType:   data.PVTString,
 	Description: "e-mail address",
 }
 
 var PFirstName = &data.PropertyType{
 	Name:        "first_name",
-	Type:        data.PVTString,
+	ValueType:   data.PVTString,
 	Description: "first name",
 }
 
 var PLastName = &data.PropertyType{
 	Name:        "last_name",
-	Type:        data.PVTString,
+	ValueType:   data.PVTString,
 	Description: "last name",
 }

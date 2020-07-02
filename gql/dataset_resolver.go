@@ -7,36 +7,35 @@ import (
 )
 
 type datasetResolver struct {
-	id      graphql.ID
+	id      datasetId
 	dataset DatasetInfo
 }
 
-func (r *datasetResolver) Id() graphql.ID {
-	return r.id
+func (r datasetResolver) Id() graphql.ID {
+	return encodeId(r.id)
 }
 
-func (r *datasetResolver) Root() (*objectResolver, error) {
+func (r datasetResolver) Root() (*objectResolver, error) {
 	root, err := r.dataset.Root()
 	if err != nil {
 		return nil, err
 	}
-	id := encodeId(objectId{
-		datasetId:      datasetId{PluginName: r.dataset.Plugin.Name(), DatasetId: r.dataset.Id()},
+	id := objectId{
+		datasetId:      r.id,
 		ObjectTypeName: root.Type().Name,
 		ObjectId:       root.Id(),
-	})
-	return &objectResolver{id: id, object: root}, nil
+	}
+	return &objectResolver{objectId: id, object: root}, nil
 }
 
-func (r *datasetResolver) Plugin() *pluginResolver {
-	id := encodeId(r.dataset.Plugin.Name())
-	return &pluginResolver{id: id, plugin: r.dataset.Plugin}
+func (r datasetResolver) Plugin() *pluginResolver {
+	return &pluginResolver{plugin: r.dataset.Plugin}
 }
 
-func (r *datasetResolver) URL() string {
+func (r datasetResolver) URL() string {
 	return r.dataset.Url
 }
 
-func (r *datasetResolver) Added() string {
+func (r datasetResolver) Added() string {
 	return strconv.FormatInt(r.dataset.Added.Unix(), 10)
 }

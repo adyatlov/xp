@@ -3,9 +3,9 @@ package gql
 import (
 	"time"
 
-	"github.com/graph-gophers/graphql-go"
+	"github.com/adyatlov/xp/data"
 
-	"github.com/adyatlov/xp/plugin"
+	"github.com/graph-gophers/graphql-go"
 )
 
 type Mutation struct {
@@ -18,7 +18,7 @@ func (m *Mutation) AddDataset(args struct {
 	PluginName string
 	Url        string
 }) (*datasetResolver, error) {
-	plugin, err := plugin.GetPlugin(plugin.Name(args.PluginName))
+	plugin, err := data.GetPlugin(data.PluginName(args.PluginName))
 	if err != nil {
 		return nil, err
 	}
@@ -35,15 +35,18 @@ func (m *Mutation) AddDataset(args struct {
 	if err := m.datasets.Add(datasetInfo); err != nil {
 		return nil, err
 	}
-	id := encodeId(datasetId{PluginName: plugin.Name(), DatasetId: dataset.Id()})
+	id := newDatasetId(plugin.Name, dataset.Id())
 	r := &datasetResolver{id: id, dataset: datasetInfo}
 	m.onDatasetAdded(r)
 	return r, nil
 }
 
 func (m *Mutation) RemoveDataset(args struct{ Id graphql.ID }) (bool, error) {
-	id := decodeId(args.Id).(datasetId)
-	if err := m.datasets.Remove(id); err != nil {
+	id, err := decodeId(args.Id)
+	if err != nil {
+		return false, err
+	}
+	if err := m.datasets.Remove(id.(datasetId)); err != nil {
 		return false, err
 	}
 	m.onDatasetRemoved(args.Id)

@@ -40,14 +40,14 @@ schema {
 
 type Query {
     node(id: ID):                   Node
-    allDatasets:                    [Dataset!]!
-    allPlugins:                     [Plugin!]!
-    compatiblePlugins(url: String): [Plugin!]!
+    datasets:                       [Dataset!]
+    plugins:                        [Plugin!]
+    compatiblePlugins(url: String): [Plugin!]
 }
 
 type Mutation {
     addDataset(pluginName: String!, url: String!): Dataset!
-    removeDataset(id: ID!):                    Boolean!
+    removeDataset(id: ID!):                        Boolean!
 }
 
 type Subscription {
@@ -65,11 +65,15 @@ interface Node {
 }
 
 type Object implements Node {
-    id:								  ID!
-    type:                             ObjectType!
-    name:                             String!
-    children(typeNames: [String!]):   [ChildrenGroup!]!
-    properties(typeNames: [String!]): [Property!]!
+    id:   ID!
+    type: ObjectType!
+    name: String!
+    properties(
+        typeNames: [String!]
+        first: Int
+        after: ID
+    ): PropertiesConnection
+    children(typeNames:  [String!]): [ObjectGroup]
 }
 
 type Property implements Node {
@@ -78,11 +82,42 @@ type Property implements Node {
     value: String!
 }
 
-type ChildrenGroup implements Node {
-    id:      ID!
-    type:    ObjectType!
-    objects: [Object!]!
-    total:   Int!
+type PropertiesConnection {
+    totalCount: Int!
+    edges: [PropertyEdge]
+    pageInfo: PageInfo!
+}
+
+type PropertyEdge {
+    cursor: ID!
+    node: Property
+}
+
+type ObjectGroup {
+    id:   ID!
+    type: ObjectType!
+    totalCount: Int!
+    Objects(
+        first:      Int
+        after:      ID
+    ): ObjectConnection
+}
+
+type ObjectConnection {
+    totalCount: Int!
+    edges: [ObjectEdge]
+    pageInfo: PageInfo!
+}
+
+type ObjectEdge {
+    cursor: ID!
+    node:   Object
+}
+
+type PageInfo {
+    startCursor: ID!
+    endCursor:   ID!
+    hasNextPage: Boolean!
 }
 
 type Dataset implements Node {
@@ -100,10 +135,10 @@ type Plugin implements Node {
 }
 
 type ObjectType {
-    name:              String!
-    pluralName:        String!
-    description:       String!
-    properties:        [PropertyType!]!
+    name:        String!
+    pluralName:  String!
+    description: String!
+    properties:  [PropertyType!]!
 }
 
 type PropertyType {
@@ -111,4 +146,5 @@ type PropertyType {
     valueType:   PropertyValueType!
     description: String!
 }
+
 `

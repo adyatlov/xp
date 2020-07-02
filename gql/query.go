@@ -3,7 +3,8 @@ package gql
 import (
 	"fmt"
 
-	"github.com/adyatlov/xp/plugin"
+	"github.com/adyatlov/xp/data"
+
 	"github.com/graph-gophers/graphql-go"
 )
 
@@ -17,7 +18,10 @@ func (q *Query) Node(args struct {
 	if args.Id == nil {
 		return nil, nil
 	}
-	id := decodeId(*args.Id)
+	id, err := decodeId(*args.Id)
+	if err != nil {
+		return nil, err
+	}
 	switch id := id.(type) {
 	case objectId:
 		dataset, err := q.datasets.Get(id.datasetId)
@@ -28,7 +32,7 @@ func (q *Query) Node(args struct {
 		if err != nil {
 			return nil, err
 		}
-		return &nodeResolver{&objectResolver{id: *args.Id, object: object}}, nil
+		return &nodeResolver{&objectResolver{objectId: id, object: object}}, nil
 	case propertyId:
 		dataset, err := q.datasets.Get(id.datasetId)
 		if err != nil {
@@ -38,12 +42,23 @@ func (q *Query) Node(args struct {
 		if err != nil {
 			return nil, err
 		}
-		properties, err := object.Properties(id.PropertyName)
+		properties := propertyPool.Get().(*[]interface{})
+		defer propertyPool.Put(properties)
+		*properties = (*properties)[:0]
+		err = object.Properties(properties, id.PropertyName)
 		if err != nil {
 			return nil, err
 		}
-		return &nodeResolver{&propertyResolver{id: *args.Id, property: properties[0]}}, nil
-	case childrenGroupId:
+		t := object.Type().PropertyType(id.PropertyName)
+		v := (*properties)[0]
+		r := &propertyResolver{
+			dId: id.datasetId,
+			t:   t,
+			v:   v,
+			id:  *args.Id,
+		}
+		return &nodeResolver{r}, nil
+	case objectGroupId:
 		dataset, err := q.datasets.Get(id.datasetId)
 		if err != nil {
 			return nil, err
@@ -52,62 +67,71 @@ func (q *Query) Node(args struct {
 		if err != nil {
 			return nil, err
 		}
-		groups, err := object.Children(id.GroupTypeName)
-		if err != nil {
-			return nil, err
+		g := object.Children(id.ObjectTypeName)
+		if g == nil {
+			return nil, nil
 		}
-		return &nodeResolver{&childrenGroupResolver{id: *args.Id, group: groups[0]}}, nil
+		r := &objectGroupResolver{
+			objectId: id.objectId,
+			g:        g,
+		}
+		return &nodeResolver{r}, nil
 	case datasetId:
 		dataset, err := q.datasets.Get(id)
 		if err != nil {
 			return nil, err
 		}
-		return &nodeResolver{&datasetResolver{id: *args.Id, dataset: dataset}}, nil
-	case plugin.Name:
-		p, err := plugin.GetPlugin(id)
+		r := &datasetResolver{
+			id:      id,
+			dataset: dataset,
+		}
+		return &nodeResolver{r}, nil
+	case pluginId:
+		p, err := data.GetPlugin(id.PluginName)
 		if err != nil {
 			return nil, err
 		}
-		return &nodeResolver{&pluginResolver{id: *args.Id, plugin: p}}, nil
+		return &nodeResolver{&pluginResolver{plugin: p}}, nil
 	}
 	panic(fmt.Sprintf("Unknown ID type: %T", id))
 }
 
-func (q *Query) AllDatasets() []*datasetResolver {
+func (q *Query) Datasets() *[]datasetResolver {
 	datasets := q.datasets.GetAll()
-	resolvers := make([]*datasetResolver, 0, len(datasets))
+	if len(datasets) == 0 {
+		return nil
+	}
+	resolvers := make([]datasetResolver, 0, len(datasets))
 	for _, dataset := range datasets {
-		id := encodeId(datasetId{
-			PluginName: dataset.Plugin.Name(),
-			DatasetId:  dataset.Id(),
+		id := newDatasetId(dataset.Plugin.Name, dataset.Id())
+		resolvers = append(resolvers, datasetResolver{
+			id:      id,
+			dataset: dataset,
 		})
-		resolvers = append(resolvers, &datasetResolver{id: id, dataset: dataset})
 	}
-	return resolvers
+	return &resolvers
 }
 
-func (q *Query) AllPlugins() []*pluginResolver {
-	plugins := plugin.GetPlugins()
-	resolvers := make([]*pluginResolver, 0, len(plugins))
+func (q *Query) Plugins() *[]pluginResolver {
+	plugins := data.GetPlugins()
+	resolvers := make([]pluginResolver, 0, len(plugins))
 	for _, p := range plugins {
-		id := encodeId(p.Name())
-		resolvers = append(resolvers, &pluginResolver{id: id, plugin: p})
+		resolvers = append(resolvers, pluginResolver{plugin: p})
 	}
-	return resolvers
+	return &resolvers
 }
 
-func (q *Query) CompatiblePlugins(args struct{ Url *string }) ([]*pluginResolver, error) {
+func (q *Query) CompatiblePlugins(args struct{ Url *string }) (*[]pluginResolver, error) {
 	if args.Url == nil {
-		return []*pluginResolver{}, nil
+		return nil, nil
 	}
-	plugins, err := plugin.GetCompatiblePlugins(*args.Url)
+	plugins, err := data.GetCompatiblePlugins(*args.Url)
 	if err != nil {
 		return nil, err
 	}
-	resolvers := make([]*pluginResolver, 0, len(plugins))
+	resolvers := make([]pluginResolver, 0, len(plugins))
 	for _, p := range plugins {
-		id := encodeId(p.Name())
-		resolvers = append(resolvers, &pluginResolver{id: id, plugin: p})
+		resolvers = append(resolvers, pluginResolver{plugin: p})
 	}
-	return resolvers, nil
+	return &resolvers, nil
 }

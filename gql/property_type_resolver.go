@@ -26,7 +26,7 @@ func (r *propertyTypeResolver) Name() string {
 }
 
 func (r *propertyTypeResolver) ValueType() string {
-	return propertyValueTypes[r.t.Type]
+	return propertyValueTypes[r.t.ValueType]
 }
 
 func (r *propertyTypeResolver) Description() string {
