@@ -35,26 +35,18 @@ func (o *Object) AddProperty(n data.PropertyName, p interface{}) {
 }
 
 func (o *Object) assertPropertyCompatible(name data.PropertyName, p interface{}) {
-	if _, ok := o.properties[name]; ok {
+	if _, ok := o.properties[name]; !ok {
 		panic(fmt.Sprintf("object %v of type %v already has property %v",
 			o.id, o.t.Name, name))
 	}
-	typeIsCorrect := false
-	var valueErr error
-	for _, t := range o.t.PropertyTypes {
-		if t.Name == name {
-			typeIsCorrect = true
-			valueErr = data.ValidatePropertyValue(t.ValueType, p)
-			break
-		}
-	}
-	if !typeIsCorrect {
-		panic(fmt.Sprintf("object %v of type %v cannot have property %v",
+	t := o.Type().PropertyType(name)
+	if t == nil {
+		panic(fmt.Sprintf("object %q of type %q cannot have property %q",
 			o.id, o.t.Name, name))
 	}
-	if valueErr != nil {
-		panic(fmt.Sprintf("error when setting property %v of object %v of type %v: %v",
-			name, o.id, o.t.Name, valueErr))
+	if err := data.ValidatePropertyValue(t.ValueType, p); err != nil {
+		panic(fmt.Sprintf("error when setting property %q of object %q of type %q: %q",
+			name, o.id, o.t.Name, err))
 	}
 }
 
