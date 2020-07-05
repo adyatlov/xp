@@ -2,8 +2,8 @@ import React from 'react';
 import {Link} from 'react-router-dom';
 
 export default function ObjectLink(props) {
-    const {nodeId, childTypeName, className} = props;
-    if (!childTypeName) {
+    const {nodeId, groupIndex, className} = props;
+    if (!groupIndex) {
         return(
             <Link to={"/o/" + nodeId} className={className}>
                 {props.children}
@@ -11,9 +11,8 @@ export default function ObjectLink(props) {
         );
     }
     return(
-        <Link to={"/o/" + nodeId + "/" + childTypeName} className={className}>
+        <Link to={"/o/" + nodeId + "/" + groupIndex} className={className}>
             {props.children}
         </Link>
     );
 }
-

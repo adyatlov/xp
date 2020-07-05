@@ -67,7 +67,7 @@ Paging:
 }
 
 func (r *propertiesConnectionResolver) TotalCount() int32 {
-	return int32(len(r.names))
+	return int32(len(r.object.Type().PropertyTypes))
 }
 
 func (r *propertiesConnectionResolver) Edges() (*[]*propertiesEdgeResolver, error) {

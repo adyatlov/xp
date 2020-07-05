@@ -71,13 +71,13 @@ func generateDataset(minEmployee, maxEmployee, nDivision int) *mem.Dataset {
 	company.AddProperty(PIncome.Name, gofakeit.Number(5e6, 10e6))
 	company.AddProperty(PExpenses.Name, gofakeit.Number(1e6, 5e6))
 	for i := 0; i < nDivision; i++ {
-		division := generateDivision(dataset, minEmployee, maxEmployee)
+		division := generateDivision(dataset, company, minEmployee, maxEmployee)
 		company.AddChild(division)
 	}
 	return dataset
 }
 
-func generateDivision(d *mem.Dataset, minEmployee, maxEmployee int) *mem.Object {
+func generateDivision(d *mem.Dataset, c *mem.Object, minEmployee, maxEmployee int) *mem.Object {
 	division := d.NewObject(TDivision,
 		data.ObjectId(gofakeit.UUID()),
 		data.ObjectName(gofakeit.Vegetable()))
@@ -85,7 +85,9 @@ func generateDivision(d *mem.Dataset, minEmployee, maxEmployee int) *mem.Object 
 	division.AddProperty(PIncome.Name, gofakeit.Number(1e6, 5e6))
 	division.AddProperty(PExpenses.Name, gofakeit.Number(1e5, 1e6))
 	for i := 0; i < gofakeit.Number(minEmployee, maxEmployee); i++ {
-		division.AddChild(generateEmployee(d))
+		e := generateEmployee(d)
+		division.AddChild(e)
+		c.AddChild(e)
 	}
 	return division
 }

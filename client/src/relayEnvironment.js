@@ -20,10 +20,10 @@ function fetchQuery(
         }),
     }).then(response => {
         // DEBUG:
-        // let tmp = response.json();
-        // tmp.then((val) => console.log(val.data));
-        // return tmp;
-        return response.json();
+        let tmp = response.json();
+        tmp.then((val) => console.log(val.data));
+        return tmp;
+        // return response.json();
     });
 }
 

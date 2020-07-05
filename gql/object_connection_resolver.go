@@ -6,7 +6,9 @@ import (
 )
 
 type objectConnectionResolver struct {
-	edges []*objectEdgeResolver
+	totalCount  int32
+	edges       []*objectEdgeResolver
+	hasNextPage bool
 }
 
 func newObjectConnectionResolver(
@@ -20,23 +22,22 @@ func newObjectConnectionResolver(
 	if err := g.All(objects); err != nil {
 		return nil, err
 	}
+	totalCount := len(*objects)
 	from := 0
 	edges := make([]*objectEdgeResolver, 0, len(*objects))
-	if after != nil {
-		for i, o := range *objects {
-			oId := objectId{
-				datasetId:      dId,
-				ObjectTypeName: o.Type().Name,
-				ObjectId:       o.Id(),
-			}
-			cursor := encodeId(oId)
-			edges = append(edges, &objectEdgeResolver{
-				cursor: cursor,
-				node:   &objectResolver{objectId: oId, object: o},
-			})
-			if cursor == *after {
-				from = i + 1
-			}
+	for i, o := range *objects {
+		oId := objectId{
+			datasetId:      dId,
+			ObjectTypeName: o.Type().Name,
+			ObjectId:       o.Id(),
+		}
+		cursor := encodeId(oId)
+		edges = append(edges, &objectEdgeResolver{
+			cursor: cursor,
+			node:   &objectResolver{objectId: oId, object: o},
+		})
+		if after != nil && cursor == *after {
+			from = i + 1
 		}
 	}
 	to := len(edges)
@@ -46,12 +47,17 @@ func newObjectConnectionResolver(
 			to = len(edges)
 		}
 	}
+	hasNextPage := to < len(edges)
 	edges = edges[from:to]
-	return &objectConnectionResolver{edges: edges}, nil
+	return &objectConnectionResolver{
+		edges:       edges,
+		totalCount:  int32(totalCount),
+		hasNextPage: hasNextPage,
+	}, nil
 }
 
 func (r *objectConnectionResolver) TotalCount() int32 {
-	return int32(len(r.edges))
+	return r.totalCount
 }
 
 func (r *objectConnectionResolver) Edges() *[]*objectEdgeResolver {
@@ -59,7 +65,14 @@ func (r *objectConnectionResolver) Edges() *[]*objectEdgeResolver {
 }
 
 func (r *objectConnectionResolver) PageInfo() pageInfoResolver {
-	return pageInfoResolver{}
+	if len(r.edges) == 0 {
+		return pageInfoResolver{}
+	}
+	return pageInfoResolver{
+		startCursor: r.edges[0].cursor,
+		endCursor:   r.edges[len(r.edges)-1].cursor,
+		hasNextPage: r.hasNextPage,
+	}
 }
 
 type objectEdgeResolver struct {

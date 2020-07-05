@@ -13,8 +13,8 @@ var TCompany = &data.ObjectType{
 		PExpenses,
 	},
 	ChildTypes: []*data.ObjectType{
-		TEmployee,
 		TDivision,
+		TEmployee,
 	},
 }
 

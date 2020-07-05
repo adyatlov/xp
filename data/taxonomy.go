@@ -62,9 +62,11 @@ type ObjectType struct {
 	PropertyTypes []*PropertyType
 	ChildTypes    []*ObjectType
 	// below are the cache fields
-	propertyTypes  map[PropertyName]*PropertyType
-	propertyNames  []PropertyName
-	childTypeNames []ObjectTypeName
+	propertyTypes    map[PropertyName]*PropertyType
+	propertyNames    []PropertyName
+	childTypes       map[ObjectTypeName]*ObjectType
+	childTypeIndexes map[ObjectTypeName]int
+	childTypeNames   []ObjectTypeName
 }
 
 // PropertyType returns nil if there is no property with the given name.
@@ -86,6 +88,26 @@ func (o *ObjectType) PropertyNames() []PropertyName {
 		}
 	}
 	return o.propertyNames
+}
+
+func (o *ObjectType) ChildType(name ObjectTypeName) *ObjectType {
+	if o.childTypes == nil {
+		o.childTypes = make(map[ObjectTypeName]*ObjectType, len(o.ChildTypes))
+		for _, t := range o.ChildTypes {
+			o.childTypes[t.Name] = t
+		}
+	}
+	return o.childTypes[name]
+}
+
+func (o *ObjectType) ChildTypeIndex(name ObjectTypeName) int {
+	if o.childTypeIndexes == nil {
+		o.childTypeIndexes = make(map[ObjectTypeName]int, len(o.ChildTypes))
+		for i, t := range o.ChildTypes {
+			o.childTypeIndexes[t.Name] = i
+		}
+	}
+	return o.childTypeIndexes[name]
 }
 
 func (o *ObjectType) ChildTypeNames() []ObjectTypeName {

@@ -2,20 +2,31 @@ import {createFragmentContainer} from "react-relay";
 import graphql from "babel-plugin-relay/macro";
 import React from "react";
 
+import {useParams} from "react-router-dom";
+import Error from "./Error";
+
 function ChildrenPropertiesList(props) {
-    let {childrenProperties} = props;
-    childrenProperties = childrenProperties[0]
-    const childrenType = childrenProperties.type;
-    const propertyTypes = childrenType.properties;
-    const objects = childrenProperties.objects;
+    let {groups} = props;
+    const {groupIndex} = useParams();
+    if (!groups) {
+        if(!groupIndex)
+        return(
+            <Error text={'No children group with the index "' + groupIndex + '"'}/>
+        )
+        return
+    }
+    let group = groups[0]
+    const propertyTypes = group.type.properties;
+    console.log(group)
+    const edges = group.objects.edges;
     return(
         <table className="table">
             <thead>
             <tr>
                 <th scope="col" className="text-nowrap">
-                    {childrenProperties.type.name} name
+                    {group.type.name} name
                 </th>
-                {propertyTypes.map((propertyType) => {
+                {propertyTypes.map(propertyType => {
                     return(
                         <th key={propertyType.name} scope="col">{propertyType.name}</th>
                     );
@@ -23,11 +34,13 @@ function ChildrenPropertiesList(props) {
             </tr>
             </thead>
             <tbody>
-            {objects.map((object) => {
+            {edges.map((edge) => {
+                const object = edge.node
                 return(
                     <tr key={object.id}>
                         <td>{object.name}</td>
-                        {object.properties.map((property) => {
+                        {object.properties.edges.map((edge) => {
+                            const property = edge.node
                             return(
                                 <td key={property.id}>{property.value}</td>
                             );
@@ -41,8 +54,8 @@ function ChildrenPropertiesList(props) {
 }
 
 export default createFragmentContainer(ChildrenPropertiesList, {
-    childrenProperties: graphql`
-        fragment ChildrenPropertiesList_childrenProperties on ObjectGroup@relay(plural: true) {
+    groups: graphql`
+        fragment ChildrenPropertiesList_groups on ObjectGroup@relay(plural: true) {
             type {
                 name
                 properties {

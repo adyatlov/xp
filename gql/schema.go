@@ -73,7 +73,7 @@ type Object implements Node {
         first: Int
         after: ID
     ): PropertiesConnection
-    children(typeNames:  [String!]): [ObjectGroup]
+    children(indexes:  [Int!]): [ObjectGroup]
 }
 
 type Property implements Node {
@@ -94,7 +94,8 @@ type PropertyEdge {
 }
 
 type ObjectGroup {
-    id:   ID!
+    id:    ID!
+    index: Int!
     type: ObjectType!
     totalCount: Int!
     objects(
@@ -146,4 +147,5 @@ type PropertyType {
     valueType:   PropertyValueType!
     description: String!
 }
+
 `

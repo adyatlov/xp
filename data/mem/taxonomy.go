@@ -51,22 +51,7 @@ func (o *Object) assertPropertyCompatible(name data.PropertyName, p interface{})
 }
 
 func (o *Object) AddChild(child data.Object) {
-	o.assertChildCompatible(child)
-	if _, ok := o.children[child.Type().Name]; !ok {
-		o.children[child.Type().Name] = make(map[data.ObjectId]data.Object)
-	}
-	o.children[child.Type().Name][child.Id()] = child
-}
-
-func (o *Object) assertChildCompatible(child data.Object) {
-	typeIsCorrect := false
-	for _, c := range o.t.ChildTypes {
-		if c.Name == child.Type().Name {
-			typeIsCorrect = true
-			break
-		}
-	}
-	if !typeIsCorrect {
+	if t := o.Type().ChildType(child.Type().Name); t == nil {
 		panic(fmt.Sprintf("object %q of type %q cannot have child with type %q",
 			o.name, o.t.Name, child.Type().Name))
 	}
@@ -74,6 +59,10 @@ func (o *Object) assertChildCompatible(child data.Object) {
 		panic(fmt.Sprintf("object %q of type %q already has a child with id %q",
 			o.id, o.t.Name, child.Id()))
 	}
+	if _, ok := o.children[child.Type().Name]; !ok {
+		o.children[child.Type().Name] = make(map[data.ObjectId]data.Object)
+	}
+	o.children[child.Type().Name][child.Id()] = child
 }
 
 func (o *Object) Type() *data.ObjectType {
@@ -103,10 +92,8 @@ func (o *Object) Properties(properties *[]interface{}, names ...data.PropertyNam
 }
 
 func (o *Object) Children(childType data.ObjectTypeName) data.ObjectGroup {
-	for _, t := range o.Type().ChildTypes {
-		if t.Name == childType {
-			return ObjectGroup{parent: o, objectType: t}
-		}
+	if t := o.Type().ChildType(childType); t != nil {
+		return ObjectGroup{parent: o, objectType: t}
 	}
 	return nil
 }
@@ -117,11 +104,11 @@ type ObjectGroup struct {
 }
 
 func (g ObjectGroup) children() map[data.ObjectId]data.Object {
-	children, ok := g.parent.children[g.objectType.Name]
-	if !ok {
-		panic("Illegal state: couldn't find children with the type " + g.objectType.Name)
+	if t := g.parent.Type().ChildType(g.objectType.Name); t == nil {
+		panic(fmt.Sprintf("illegal state: object %q of type %q cannot have child with type %q",
+			g.parent.name, g.parent.Type().Name, g.objectType.Name))
 	}
-	return children
+	return g.parent.children[g.objectType.Name]
 }
 
 func (g ObjectGroup) Type() *data.ObjectType {
@@ -153,12 +140,12 @@ func NewDataset(id data.DatasetId,
 	rootType *data.ObjectType,
 	rootId data.ObjectId,
 	rootName data.ObjectName) (*Dataset, *Object) {
-	root := newObject(rootType, rootId, rootName)
 	dataset := &Dataset{
 		id:      id,
-		root:    root,
 		objects: make(map[data.ObjectTypeName]map[data.ObjectId]data.Object),
 	}
+	root := dataset.NewObject(rootType, rootId, rootName)
+	dataset.root = root
 	return dataset, root
 }
 

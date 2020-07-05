@@ -16,7 +16,7 @@ export default class App extends React.Component {
                 <Route path="/" exact>
                     <PageHome/>
                 </Route>
-                <Route path={["/o/:nodeId/:childTypeNames", "/o/:nodeId"]}>
+                <Route path={["/o/:nodeId/:groupIndex", "/o/:nodeId"]}>
                     <PageObject/>
                 </Route>
                 <Route>

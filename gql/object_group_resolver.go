@@ -7,6 +7,7 @@ import (
 
 type objectGroupResolver struct {
 	objectId objectId
+	index    int32
 	g        data.ObjectGroup
 }
 
@@ -15,6 +16,10 @@ func (r *objectGroupResolver) Id() graphql.ID {
 		objectId:       r.objectId,
 		ObjectTypeName: r.g.Type().Name,
 	})
+}
+
+func (r *objectGroupResolver) Index() int32 {
+	return r.index
 }
 
 func (r *objectGroupResolver) Type() objectTypeResolver {
@@ -29,9 +34,6 @@ func (r *objectGroupResolver) Objects(args struct {
 	First *int32
 	After *graphql.ID
 }) (*objectConnectionResolver, error) {
-	if args.First == nil || *args.First <= 0 {
-		return nil, nil
-	}
 	return newObjectConnectionResolver(
 		r.objectId.datasetId,
 		r.g,

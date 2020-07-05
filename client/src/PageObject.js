@@ -10,7 +10,7 @@ import ChildrenPropertiesList from "./ChildrenPropertiesList";
 import ObjectLink from "./ObjectLink";
 
 const query = graphql`
-    query PageObjectQuery($nodeId: ID, $childTypeNames: [String!]) {
+    query PageObjectQuery($nodeId: ID, $groupsIndexes: [Int!]) {
         node(id: $nodeId) {
             id
             ... on Object {
@@ -33,6 +33,7 @@ const query = graphql`
                 }
                 children {
                     id
+                    index
                     type {
                         name
                         pluralName
@@ -40,8 +41,8 @@ const query = graphql`
                     }
                     totalCount
                 }
-                selectedChildren: children(typeNames: $childTypeNames) {
-                    ...ChildrenPropertiesList_childrenProperties
+                selectedGroups: children(indexes: $groupsIndexes) {
+                    ...ChildrenPropertiesList_groups
                 }
             }
         }
@@ -49,8 +50,10 @@ const query = graphql`
 `;
 
 function PageObject(props) {
-    const {object} = props;
-    const {selectedChildren} = object;
+    const {object, groups} = props;
+    if (!object) {
+        return( <Error text="Unknown object"/> );
+    }
     return (
         <div className="container-fluid">
             <div className="row">
@@ -58,7 +61,7 @@ function PageObject(props) {
                     <LeftPanel object={object}/>
                 </div>
                 <div className="col-9">
-                    <ChildrenPropertiesList childrenProperties={selectedChildren} />
+                    <ChildrenPropertiesList groups={groups} />
                 </div>
             </div>
         </div>
@@ -66,10 +69,10 @@ function PageObject(props) {
 }
 
 export default function PageObjectQuery() {
-    const params = useParams();
-    let {nodeId, childTypeNames} = params;
-    if (childTypeNames) {
-        childTypeNames = [childTypeNames];
+    let {nodeId, groupIndex} = useParams();
+    let groupsIndexes = [0];
+    if (groupIndex) {
+        groupsIndexes = [parseInt(groupIndex)];
     }
     return(
         <QueryRenderer
@@ -78,7 +81,7 @@ export default function PageObjectQuery() {
             fetchPolicy={"store-and-network"}
             variables={{
                 nodeId: nodeId,
-                childTypeNames: childTypeNames,
+                groupsIndexes: groupsIndexes,
             }}
             render={({error, props}) => {
                 if (error) {
@@ -92,9 +95,10 @@ export default function PageObjectQuery() {
                         <LoadingSpinner />
                     );
                 }
-                const {node, childrenProperties} = props;
+                console.log(props);
+                const {node} = props;
                 return(
-                    <PageObject object={node} childrenProperties={childrenProperties} />
+                    <PageObject object={node} groups={node.selectedGroups} />
                 );
             }}
         />
@@ -122,10 +126,10 @@ function PropertyList(props) {
     return(
         <table className="table table-sm table-borderless">
             <tbody>
-            {properties.map(property => (
-                <tr key={property.id}>
-                    <th>{property.type.name} </th>
-                    <td>{property.value}</td>
+            {properties.edges.map(edge => (
+                <tr key={edge.node.id}>
+                    <th>{edge.node.type.name} </th>
+                    <td>{edge.node.value}</td>
                 </tr>
             ))}
             </tbody>
@@ -140,7 +144,7 @@ function GroupList(props) {
     return(
         <div className="list-group list-group-flush list-group-item-action">
             {children.map(group => (
-                <ObjectLink nodeId={nodeId} childTypeName={group.type.name} key={group.id} className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <ObjectLink nodeId={nodeId} groupIndex={group.index} key={group.id} className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                     {group.type.pluralName}
                     <span className="badge badge-secondary badge-pill">{group.total}</span>
                 </ObjectLink>))}
