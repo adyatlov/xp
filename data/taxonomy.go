@@ -43,10 +43,10 @@ type Object interface {
 	// Properties should return all object properties if names is empty.
 	// Returns error if something went wrong during the evaluation of the properties.
 	Properties(properties *[]interface{}, names ...PropertyName) error
-	// Objects returns a group of object children of the specified type.
+	// ChildGroup returns a group of object children of the specified type.
 	// If the childType is not listed amongst the correspondent ObjectType.ChildTypes,
 	// the function returns nil.
-	Children(childType ObjectTypeName) ObjectGroup
+	ChildGroup(childTypeName ObjectTypeName) ObjectGroup
 }
 
 type Dataset interface {
@@ -62,11 +62,10 @@ type ObjectType struct {
 	PropertyTypes []*PropertyType
 	ChildTypes    []*ObjectType
 	// below are the cache fields
-	propertyTypes    map[PropertyName]*PropertyType
-	propertyNames    []PropertyName
-	childTypes       map[ObjectTypeName]*ObjectType
-	childTypeIndexes map[ObjectTypeName]int
-	childTypeNames   []ObjectTypeName
+	propertyTypes  map[PropertyName]*PropertyType
+	propertyNames  []PropertyName
+	childTypes     map[ObjectTypeName]*ObjectType
+	childTypeNames []ObjectTypeName
 }
 
 // PropertyType returns nil if there is no property with the given name.
@@ -98,16 +97,6 @@ func (o *ObjectType) ChildType(name ObjectTypeName) *ObjectType {
 		}
 	}
 	return o.childTypes[name]
-}
-
-func (o *ObjectType) ChildTypeIndex(name ObjectTypeName) int {
-	if o.childTypeIndexes == nil {
-		o.childTypeIndexes = make(map[ObjectTypeName]int, len(o.ChildTypes))
-		for i, t := range o.ChildTypes {
-			o.childTypeIndexes[t.Name] = i
-		}
-	}
-	return o.childTypeIndexes[name]
 }
 
 func (o *ObjectType) ChildTypeNames() []ObjectTypeName {

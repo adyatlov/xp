@@ -4,14 +4,15 @@ import {QueryRenderer} from 'react-relay';
 import {useParams} from "react-router-dom";
 
 import environment from "./relayEnvironment";
+import TopBar from "./TopBar";
 import LoadingSpinner from "./LoadingSpinner";
 import Error from "./Error";
 import ChildrenPropertiesList from "./ChildrenPropertiesList";
 import ObjectLink from "./ObjectLink";
 
 const query = graphql`
-    query PageObjectQuery($nodeId: ID, $groupsIndexes: [Int!]) {
-        node(id: $nodeId) {
+    query PageObjectQuery($id: ID, $childGroupTypeName: String) {
+        node(id: $id) {
             id
             ... on Object {
                 name
@@ -21,19 +22,18 @@ const query = graphql`
                 }
                 properties {
                     edges {
-                       node {
-                           id
-                           value
-                           type {
-                               name
-                               description
-                           }
-                       }
+                        node {
+                            id
+                            value
+                            type {
+                                name
+                                description
+                            }
+                        }
                     }
                 }
-                children {
+                childGroups {
                     id
-                    index
                     type {
                         name
                         pluralName
@@ -41,8 +41,29 @@ const query = graphql`
                     }
                     totalCount
                 }
-                selectedGroups: children(indexes: $groupsIndexes) {
-                    ...ChildrenPropertiesList_groups
+                childGroup(typeName: $childGroupTypeName) {
+                    type {
+                        name
+                        propertyTypes {
+                            name
+                        }
+                    }
+                    children {
+                        edges {
+                            node {
+                                id
+                                name
+                                properties {
+                                    edges {
+                                        node {
+                                            id
+                                            value
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -50,18 +71,19 @@ const query = graphql`
 `;
 
 function PageObject(props) {
-    const {object, groups} = props;
+    const {object} = props;
     if (!object) {
         return( <Error text="Unknown object"/> );
     }
     return (
         <div className="container-fluid">
+            <TopBar/>
             <div className="row">
                 <div className="col-3">
                     <LeftPanel object={object}/>
                 </div>
                 <div className="col-9">
-                    <ChildrenPropertiesList groups={groups} />
+                    <ChildrenPropertiesList childGroup={object.childGroup} />
                 </div>
             </div>
         </div>
@@ -69,19 +91,15 @@ function PageObject(props) {
 }
 
 export default function PageObjectQuery() {
-    let {nodeId, groupIndex} = useParams();
-    let groupsIndexes = [0];
-    if (groupIndex) {
-        groupsIndexes = [parseInt(groupIndex)];
-    }
+    let {id, childGroupTypeName} = useParams();
     return(
         <QueryRenderer
             environment={environment}
             query={query}
             fetchPolicy={"store-and-network"}
             variables={{
-                nodeId: nodeId,
-                groupsIndexes: groupsIndexes,
+                id: id,
+                childGroupTypeName: childGroupTypeName,
             }}
             render={({error, props}) => {
                 if (error) {
@@ -98,7 +116,7 @@ export default function PageObjectQuery() {
                 console.log(props);
                 const {node} = props;
                 return(
-                    <PageObject object={node} groups={node.selectedGroups} />
+                    <PageObject object={node}/>
                 );
             }}
         />
@@ -107,7 +125,8 @@ export default function PageObjectQuery() {
 
 function LeftPanel(props) {
     const {object} = props;
-    const {properties, children} = object;
+    console.log(object)
+    const {properties, childGroups} = object;
     return (
         <div className="card">
             <div className="card-header">
@@ -116,7 +135,7 @@ function LeftPanel(props) {
             <div className="card-body">
                 <PropertyList properties={properties} />
             </div>
-            <GroupList children={children}/>
+            <GroupList childGroups={childGroups}/>
         </div>
     );
 }
@@ -138,18 +157,19 @@ function PropertyList(props) {
 }
 
 function GroupList(props) {
-    const {children} = props;
+    const {childGroups} = props;
     const params = useParams();
-    const {nodeId} = params;
+    const {id} = params;
     return(
         <div className="list-group list-group-flush list-group-item-action">
-            {children.map(group => (
-                <ObjectLink nodeId={nodeId} groupIndex={group.index} key={group.id} className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            {childGroups.map(group => (
+                <ObjectLink id={id}
+                            childGroupTypeName={group.type.name}
+                            key={group.id}
+                            className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                     {group.type.pluralName}
-                    <span className="badge badge-secondary badge-pill">{group.total}</span>
+                    <span className="badge badge-primary badge-pill">{group.totalCount}</span>
                 </ObjectLink>))}
         </div>
     );
 }
-
-

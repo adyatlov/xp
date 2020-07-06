@@ -13,8 +13,8 @@ const query = graphql`
 `;
 
 const mutation = graphql`
-    mutation DatasetAdderAddDatasetMutation($plugin: String!, $url: String!) {
-        addDataset(pluginName: $plugin, url: $url) {
+    mutation DatasetAdderAddDatasetMutation($pluginName: String!, $url: String!) {
+        addDataset(pluginName: $pluginName, url: $url) {
             id
         }
     }
@@ -25,7 +25,7 @@ function addDataset(environment, pluginName, url) {
         {
             mutation,
             variables: {
-                plugin: pluginName,
+                pluginName: pluginName,
                 url: url
             },
             onError: (error) => {

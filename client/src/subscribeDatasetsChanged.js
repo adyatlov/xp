@@ -19,11 +19,7 @@ const subscription = graphql`
                     type {
                         name
                     }
-                    children {
-                        type {
-                            name
-                        }
-                    }
+                    firstAvailableChildGroupTypeName
                 }
             }
         }

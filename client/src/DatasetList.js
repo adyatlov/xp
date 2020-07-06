@@ -10,6 +10,7 @@ function DatasetList(props) {
         return <div>Loading dataset list...</div>
     }
     const {datasets} = props;
+    console.log(datasets);
     return(
         <table className="table table-hover">
             <thead>
@@ -25,12 +26,14 @@ function DatasetList(props) {
             <tbody>
             {datasets.map((dataset) => {
                 let added = parseInt(dataset.added) * 1000;
+                const firstAvailableChildGroupTypeName = dataset.root.firstAvailableChildGroupTypeName;
                 added = new Date(added);
                 added = added.toLocaleString();
                 return(
                     <tr key={dataset.id}>
                         <td className="text-nowrap">
-                            <ObjectLink nodeId={dataset.root.id}>
+                            <ObjectLink id={dataset.root.id}
+                                        childGroupTypeName={firstAvailableChildGroupTypeName}>
                                 {dataset.root.name}
                             </ObjectLink>
                         </td>
@@ -77,6 +80,7 @@ export default createFragmentContainer(DatasetList, {
                 type {
                     name
                 }
+                firstAvailableChildGroupTypeName 
             }
         }
     `}

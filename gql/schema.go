@@ -73,11 +73,13 @@ type Object implements Node {
         first: Int
         after: ID
     ): PropertiesConnection
-    children(indexes:  [Int!]): [ObjectGroup]
+    childGroup(typeName:  String): ChildGroup
+    childGroups(typeNames:  [String!]): [ChildGroup]
+    firstAvailableChildGroupTypeName: String
 }
 
 type Property implements Node {
-    id:          ID!
+    id:    ID!
     type:  PropertyType!
     value: String!
 }
@@ -93,24 +95,23 @@ type PropertyEdge {
     node: Property
 }
 
-type ObjectGroup {
+type ChildGroup {
     id:    ID!
-    index: Int!
     type: ObjectType!
     totalCount: Int!
-    objects(
-        first:      Int
+    children(
+        first:      String
         after:      ID
-    ): ObjectConnection
+    ): ChildrenConnection
 }
 
-type ObjectConnection {
+type ChildrenConnection {
     totalCount: Int!
-    edges: [ObjectEdge]
+    edges: [ChildEdge]
     pageInfo: PageInfo!
 }
 
-type ObjectEdge {
+type ChildEdge {
     cursor: ID!
     node:   Object
 }
@@ -139,7 +140,7 @@ type ObjectType {
     name:        String!
     pluralName:  String!
     description: String!
-    properties:  [PropertyType!]!
+    propertyTypes:  [PropertyType!]!
 }
 
 type PropertyType {
@@ -147,5 +148,4 @@ type PropertyType {
     valueType:   PropertyValueType!
     description: String!
 }
-
 `

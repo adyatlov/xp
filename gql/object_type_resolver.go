@@ -18,7 +18,7 @@ func (r objectTypeResolver) Description() string {
 	return r.t.Description
 }
 
-func (r objectTypeResolver) Properties() []*propertyTypeResolver {
+func (r objectTypeResolver) PropertyTypes() []*propertyTypeResolver {
 	resolvers := make([]*propertyTypeResolver, 0, len(r.t.PropertyTypes))
 	for _, property := range r.t.PropertyTypes {
 		resolvers = append(resolvers, &propertyTypeResolver{property})

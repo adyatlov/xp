@@ -37,35 +37,57 @@ func (r *objectResolver) Properties(
 	)
 }
 
-func (r *objectResolver) Children(args struct{ Indexes *[]int32 }) *[]*objectGroupResolver {
-	if args.Indexes == nil || len(*args.Indexes) == 0 {
-		objectGroups := make([]*objectGroupResolver, 0, len(r.object.Type().ChildTypeNames()))
-		for i, name := range r.object.Type().ChildTypeNames() {
-			objectGroup := r.object.Children(name)
-			if objectGroup == nil {
-				objectGroups = append(objectGroups, nil)
-				continue
-			}
-			objectGroups = append(objectGroups, &objectGroupResolver{
-				objectId: r.objectId,
-				index:    int32(i),
-				g:        objectGroup})
+func (r *objectResolver) ChildGroups(args struct{ TypeNames *[]string }) *[]*childGroupResolver {
+	var names []data.ObjectTypeName
+	if args.TypeNames == nil || len(*args.TypeNames) == 0 {
+		names = make([]data.ObjectTypeName, 0, len(r.object.Type().ChildTypeNames()))
+		for _, name := range r.object.Type().ChildTypeNames() {
+			names = append(names, name)
 		}
-		return &objectGroups
+	} else {
+		names = make([]data.ObjectTypeName, 0, len(*args.TypeNames))
+		for _, name := range *args.TypeNames {
+			names = append(names, data.ObjectTypeName(name))
+		}
 	}
-	objectGroups := make([]*objectGroupResolver, 0, len(*args.Indexes))
-	for _, index := range *args.Indexes {
-		index := int(index)
-		if index < 0 || index >= len(r.object.Type().ChildTypeNames()) {
-			objectGroups = append(objectGroups, nil)
+	childGroups := make([]*childGroupResolver, 0, len(names))
+	for _, name := range names {
+		childGroup := r.object.ChildGroup(name)
+		if childGroup == nil {
+			childGroups = append(childGroups)
 			continue
 		}
-		t := r.object.Type().ChildTypes[index]
-		objectGroup := r.object.Children(t.Name)
-		objectGroups = append(objectGroups, &objectGroupResolver{
-			objectId: r.objectId,
-			index:    int32(index),
-			g:        objectGroup})
+		childGroups = append(childGroups, &childGroupResolver{
+			parentId: r.objectId,
+			g:        childGroup})
 	}
-	return &objectGroups
+	return &childGroups
+}
+
+func (r *objectResolver) ChildGroup(args struct{ TypeName *string }) *childGroupResolver {
+	var typeName data.ObjectTypeName
+	if args.TypeName == nil {
+		return nil
+	}
+	typeName = data.ObjectTypeName(*args.TypeName)
+	g := r.object.ChildGroup(typeName)
+	if g == nil {
+		return nil
+	}
+	return &childGroupResolver{
+		parentId: r.objectId,
+		g:        g,
+	}
+}
+
+func (r *objectResolver) FirstAvailableChildGroupTypeName() *string {
+	for _, name := range r.object.Type().ChildTypeNames() {
+		childGroup := r.object.ChildGroup(name)
+		if childGroup == nil {
+			continue
+		}
+		firstAvailableChildGroupTypeName := string(childGroup.Type().Name)
+		return &firstAvailableChildGroupTypeName
+	}
+	return nil
 }

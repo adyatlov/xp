@@ -60,9 +60,9 @@ export default createFragmentContainer(
                     typeName
                     value
                 }
-                children {
+                childGroups {
                     typeName
-                    objects {
+                    children {
                         name
                         objectId
                         metrics {

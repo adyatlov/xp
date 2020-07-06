@@ -5,17 +5,17 @@ import (
 	"github.com/graph-gophers/graphql-go"
 )
 
-type objectConnectionResolver struct {
+type childrenConnectionResolver struct {
 	totalCount  int32
-	edges       []*objectEdgeResolver
+	edges       []*childEdgeResolver
 	hasNextPage bool
 }
 
-func newObjectConnectionResolver(
+func newChildrenConnectionResolver(
 	dId datasetId,
 	g data.ObjectGroup,
 	first *int32,
-	after *graphql.ID) (*objectConnectionResolver, error) {
+	after *graphql.ID) (*childrenConnectionResolver, error) {
 	objects := objectPool.Get().(*[]data.Object)
 	defer objectPool.Put(objects)
 	*objects = (*objects)[:0]
@@ -24,7 +24,7 @@ func newObjectConnectionResolver(
 	}
 	totalCount := len(*objects)
 	from := 0
-	edges := make([]*objectEdgeResolver, 0, len(*objects))
+	edges := make([]*childEdgeResolver, 0, len(*objects))
 	for i, o := range *objects {
 		oId := objectId{
 			datasetId:      dId,
@@ -32,7 +32,7 @@ func newObjectConnectionResolver(
 			ObjectId:       o.Id(),
 		}
 		cursor := encodeId(oId)
-		edges = append(edges, &objectEdgeResolver{
+		edges = append(edges, &childEdgeResolver{
 			cursor: cursor,
 			node:   &objectResolver{objectId: oId, object: o},
 		})
@@ -49,22 +49,22 @@ func newObjectConnectionResolver(
 	}
 	hasNextPage := to < len(edges)
 	edges = edges[from:to]
-	return &objectConnectionResolver{
+	return &childrenConnectionResolver{
 		edges:       edges,
 		totalCount:  int32(totalCount),
 		hasNextPage: hasNextPage,
 	}, nil
 }
 
-func (r *objectConnectionResolver) TotalCount() int32 {
+func (r *childrenConnectionResolver) TotalCount() int32 {
 	return r.totalCount
 }
 
-func (r *objectConnectionResolver) Edges() *[]*objectEdgeResolver {
+func (r *childrenConnectionResolver) Edges() *[]*childEdgeResolver {
 	return &r.edges
 }
 
-func (r *objectConnectionResolver) PageInfo() pageInfoResolver {
+func (r *childrenConnectionResolver) PageInfo() pageInfoResolver {
 	if len(r.edges) == 0 {
 		return pageInfoResolver{}
 	}
@@ -75,15 +75,15 @@ func (r *objectConnectionResolver) PageInfo() pageInfoResolver {
 	}
 }
 
-type objectEdgeResolver struct {
+type childEdgeResolver struct {
 	cursor graphql.ID
 	node   *objectResolver
 }
 
-func (r *objectEdgeResolver) Cursor() graphql.ID {
+func (r *childEdgeResolver) Cursor() graphql.ID {
 	return r.cursor
 }
 
-func (r *objectEdgeResolver) Node() *objectResolver {
+func (r *childEdgeResolver) Node() *objectResolver {
 	return r.node
 }

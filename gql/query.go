@@ -73,12 +73,12 @@ func (q *Query) Node(args struct {
 		if err != nil {
 			return nil, err
 		}
-		g := object.Children(id.ObjectTypeName)
+		g := object.ChildGroup(id.ObjectTypeName)
 		if g == nil {
 			return nil, nil
 		}
-		r := &objectGroupResolver{
-			objectId: id.objectId,
+		r := &childGroupResolver{
+			parentId: id.objectId,
 			g:        g,
 		}
 		return &nodeResolver{r}, nil
@@ -105,7 +105,8 @@ func (q *Query) Node(args struct {
 func (q *Query) Datasets() *[]datasetResolver {
 	datasets := q.datasets.GetAll()
 	if len(datasets) == 0 {
-		return nil
+		var d []datasetResolver
+		return &d
 	}
 	resolvers := make([]datasetResolver, 0, len(datasets))
 	for _, dataset := range datasets {

@@ -15,17 +15,17 @@ var _ data.ObjectGroup = &ObjectGroup{}
 var _ data.Dataset = &Dataset{}
 
 type Object struct {
-	t          *data.ObjectType
-	id         data.ObjectId
-	name       data.ObjectName
-	properties map[data.PropertyName]interface{}
-	children   map[data.ObjectTypeName]map[data.ObjectId]data.Object
+	t              *data.ObjectType
+	id             data.ObjectId
+	name           data.ObjectName
+	properties     map[data.PropertyName]interface{}
+	childrenGroups map[data.ObjectTypeName]map[data.ObjectId]data.Object
 }
 
 func newObject(t *data.ObjectType, id data.ObjectId, name data.ObjectName) *Object {
 	object := &Object{t: t, id: id, name: name}
 	object.properties = make(map[data.PropertyName]interface{})
-	object.children = make(map[data.ObjectTypeName]map[data.ObjectId]data.Object)
+	object.childrenGroups = make(map[data.ObjectTypeName]map[data.ObjectId]data.Object)
 	return object
 }
 
@@ -55,14 +55,14 @@ func (o *Object) AddChild(child data.Object) {
 		panic(fmt.Sprintf("object %q of type %q cannot have child with type %q",
 			o.name, o.t.Name, child.Type().Name))
 	}
-	if _, ok := o.children[child.Type().Name][child.Id()]; ok {
+	if _, ok := o.childrenGroups[child.Type().Name][child.Id()]; ok {
 		panic(fmt.Sprintf("object %q of type %q already has a child with id %q",
 			o.id, o.t.Name, child.Id()))
 	}
-	if _, ok := o.children[child.Type().Name]; !ok {
-		o.children[child.Type().Name] = make(map[data.ObjectId]data.Object)
+	if _, ok := o.childrenGroups[child.Type().Name]; !ok {
+		o.childrenGroups[child.Type().Name] = make(map[data.ObjectId]data.Object)
 	}
-	o.children[child.Type().Name][child.Id()] = child
+	o.childrenGroups[child.Type().Name][child.Id()] = child
 }
 
 func (o *Object) Type() *data.ObjectType {
@@ -91,8 +91,8 @@ func (o *Object) Properties(properties *[]interface{}, names ...data.PropertyNam
 	return nil
 }
 
-func (o *Object) Children(childType data.ObjectTypeName) data.ObjectGroup {
-	if t := o.Type().ChildType(childType); t != nil {
+func (o *Object) ChildGroup(childTypeName data.ObjectTypeName) data.ObjectGroup {
+	if t := o.Type().ChildType(childTypeName); t != nil {
 		return ObjectGroup{parent: o, objectType: t}
 	}
 	return nil
@@ -108,7 +108,7 @@ func (g ObjectGroup) children() map[data.ObjectId]data.Object {
 		panic(fmt.Sprintf("illegal state: object %q of type %q cannot have child with type %q",
 			g.parent.name, g.parent.Type().Name, g.objectType.Name))
 	}
-	return g.parent.children[g.objectType.Name]
+	return g.parent.childrenGroups[g.objectType.Name]
 }
 
 func (g ObjectGroup) Type() *data.ObjectType {
