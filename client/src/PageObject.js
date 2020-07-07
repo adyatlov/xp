@@ -129,15 +129,23 @@ export default function PageObjectQuery() {
 function LeftPanel(props) {
     const {object} = props;
     const {properties, childGroups} = object;
+    let selectedGroupTypeName;
+    if (object.childGroup) {
+        selectedGroupTypeName = object.childGroup.type.name;
+    }
     return (
         <div className="card">
             <div className="card-header">
-                <h5 className="align-middle">{object.name} <span className="badge badge-primary">{object.type.name}</span></h5>
+                <h5 className="align-middle">
+                    <span className="badge badge-primary">{object.type.name}</span>
+                    <span>&nbsp;</span>
+                    <span>{object.name}</span>
+                </h5>
             </div>
             <div className="card-body">
                 <PropertyList properties={properties} />
             </div>
-            <GroupList childGroups={childGroups}/>
+            <GroupList childGroups={childGroups} selectedGroupTypeName={selectedGroupTypeName} />
         </div>
     );
 }
@@ -160,7 +168,7 @@ function PropertyList(props) {
 }
 
 function GroupList(props) {
-    const {childGroups} = props;
+    const {childGroups, selectedGroupTypeName} = props;
     const params = useParams();
     const {id} = params;
     return(
@@ -169,10 +177,26 @@ function GroupList(props) {
                 <ObjectLink id={id}
                             childGroupTypeName={group.type.name}
                             key={group.id}
-                            className="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            className={GroupListObjectLinkClassName(group.type.name === selectedGroupTypeName)}>
                     {group.type.pluralName}
-                    <span className="badge badge-primary badge-pill">{group.totalCount}</span>
+                    <span className={GroupListObjectLinkCounterClassName(group.type.name === selectedGroupTypeName)}>{group.totalCount}</span>
                 </ObjectLink>))}
         </div>
     );
+}
+
+function GroupListObjectLinkClassName(active) {
+    let activeClass = "";
+    if (active) {
+        activeClass = " active"
+    }
+    return "list-group-item list-group-item-action d-flex justify-content-between align-items-center" +
+        activeClass
+}
+
+function GroupListObjectLinkCounterClassName(active) {
+    if (active) {
+        return "badge badge-light badge-pill";
+    }
+    return "badge badge-primary badge-pill";
 }
