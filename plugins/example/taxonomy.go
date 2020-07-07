@@ -54,7 +54,7 @@ var PEstablished = &data.PropertyType{
 }
 
 var PCompanyForm = &data.PropertyType{
-	Name:        "company_form",
+	Name:        "company form",
 	ValueType:   data.PVTType,
 	Description: "type of business",
 }
@@ -72,13 +72,13 @@ var PExpenses = &data.PropertyType{
 }
 
 var PBirthDay = &data.PropertyType{
-	Name:        "birth_day",
+	Name:        "birth day",
 	ValueType:   data.PVTTimestamp,
 	Description: "day of birth",
 }
 
 var PFirstDay = &data.PropertyType{
-	Name:        "first_day",
+	Name:        "first day",
 	ValueType:   data.PVTTimestamp,
 	Description: "employment begins",
 }
@@ -96,13 +96,13 @@ var PEmail = &data.PropertyType{
 }
 
 var PFirstName = &data.PropertyType{
-	Name:        "first_name",
+	Name:        "first name",
 	ValueType:   data.PVTString,
 	Description: "first name",
 }
 
 var PLastName = &data.PropertyType{
-	Name:        "last_name",
+	Name:        "last name",
 	ValueType:   data.PVTString,
 	Description: "last name",
 }

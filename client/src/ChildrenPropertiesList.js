@@ -2,6 +2,7 @@ import React from "react";
 
 import {useParams} from "react-router-dom";
 import Error from "./Error";
+import ObjectLink from "./ObjectLink";
 
 export default function ChildrenPropertiesList(props) {
     const {childGroup} = props;
@@ -22,12 +23,14 @@ export default function ChildrenPropertiesList(props) {
         <table className="table">
             <thead>
             <tr>
-                <th scope="col" className="text-nowrap">
+                <th scope="col" className="text-nowrap text-capitalize">
                     {childGroup.type.name} Name
                 </th>
                 {propertyTypes.map(propertyType => {
                     return(
-                        <th key={propertyType.name} scope="col">{propertyType.name}</th>
+                        <th key={propertyType.name} scope="col" className="text-capitalize">
+                            {propertyType.name}
+                        </th>
                     );
                 })}
             </tr>
@@ -37,7 +40,11 @@ export default function ChildrenPropertiesList(props) {
                 const object = edge.node
                 return(
                     <tr key={object.id}>
-                        <td>{object.name}</td>
+                        <td>
+                            <ObjectLink id={object.id} childGroupTypeName={object.firstAvailableChildGroupTypeName}>
+                            {object.name}
+                            </ObjectLink>
+                        </td>
                         {object.properties.edges.map((edge) => {
                             const property = edge.node
                             return(

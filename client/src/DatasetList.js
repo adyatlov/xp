@@ -10,7 +10,6 @@ function DatasetList(props) {
         return <div>Loading dataset list...</div>
     }
     const {datasets} = props;
-    console.log(datasets);
     return(
         <table className="table table-hover">
             <thead>

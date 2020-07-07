@@ -2,7 +2,6 @@ package gql
 
 import (
 	"fmt"
-	"log"
 	"sort"
 
 	"github.com/adyatlov/xp/data"
@@ -17,7 +16,6 @@ type Query struct {
 func (q *Query) Node(args struct {
 	Id *graphql.ID
 }) (*nodeResolver, error) {
-	log.Println(*args.Id)
 	if args.Id == nil {
 		return nil, nil
 	}
@@ -27,17 +25,14 @@ func (q *Query) Node(args struct {
 	}
 	switch id := id.(type) {
 	case objectId:
-		log.Println(1)
 		dataset, err := q.datasets.Get(id.datasetId)
 		if err != nil {
 			return nil, err
 		}
-		log.Println(2)
 		object, err := dataset.Find(id.ObjectTypeName, id.ObjectId)
 		if err != nil {
 			return nil, err
 		}
-		log.Println(3)
 		return &nodeResolver{&objectResolver{objectId: id, object: object}}, nil
 	case propertyId:
 		dataset, err := q.datasets.Get(id.datasetId)

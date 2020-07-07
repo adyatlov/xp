@@ -1,6 +1,8 @@
 package gql
 
 import (
+	"sort"
+
 	"github.com/adyatlov/xp/data"
 	"github.com/graph-gophers/graphql-go"
 )
@@ -22,6 +24,9 @@ func newChildrenConnectionResolver(
 	if err := g.All(objects); err != nil {
 		return nil, err
 	}
+	sort.Slice(*objects, func(i, j int) bool {
+		return (*objects)[i].Name() < (*objects)[j].Name()
+	})
 	totalCount := len(*objects)
 	from := 0
 	edges := make([]*childEdgeResolver, 0, len(*objects))

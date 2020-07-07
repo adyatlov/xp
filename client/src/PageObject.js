@@ -53,6 +53,7 @@ const query = graphql`
                             node {
                                 id
                                 name
+                                firstAvailableChildGroupTypeName
                                 properties {
                                     edges {
                                         node {
@@ -113,7 +114,6 @@ export default function PageObjectQuery() {
                         <LoadingSpinner />
                     );
                 }
-                console.log(props);
                 const {node} = props;
                 return(
                     <PageObject object={node}/>
@@ -125,7 +125,6 @@ export default function PageObjectQuery() {
 
 function LeftPanel(props) {
     const {object} = props;
-    console.log(object)
     const {properties, childGroups} = object;
     return (
         <div className="card">
@@ -147,7 +146,7 @@ function PropertyList(props) {
             <tbody>
             {properties.edges.map(edge => (
                 <tr key={edge.node.id}>
-                    <th>{edge.node.type.name} </th>
+                    <th className="text-capitalize">{edge.node.type.name} </th>
                     <td>{edge.node.value}</td>
                 </tr>
             ))}
@@ -161,7 +160,7 @@ function GroupList(props) {
     const params = useParams();
     const {id} = params;
     return(
-        <div className="list-group list-group-flush list-group-item-action">
+        <div className="list-group list-group-flush list-group-item-action text-capitalize">
             {childGroups.map(group => (
                 <ObjectLink id={id}
                             childGroupTypeName={group.type.name}
