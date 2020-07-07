@@ -9,6 +9,7 @@ import LoadingSpinner from "./LoadingSpinner";
 import Error from "./Error";
 import ChildrenPropertiesList from "./ChildrenPropertiesList";
 import ObjectLink from "./ObjectLink";
+import PropertyValue from "./PropertyValue";
 
 const query = graphql`
     query PageObjectQuery($id: ID, $childGroupTypeName: String) {
@@ -27,6 +28,7 @@ const query = graphql`
                             value
                             type {
                                 name
+                                valueType
                                 description
                             }
                         }
@@ -46,6 +48,7 @@ const query = graphql`
                         name
                         propertyTypes {
                             name
+                            valueType
                         }
                     }
                     children {
@@ -146,8 +149,9 @@ function PropertyList(props) {
             <tbody>
             {properties.edges.map(edge => (
                 <tr key={edge.node.id}>
-                    <th className="text-capitalize">{edge.node.type.name} </th>
-                    <td>{edge.node.value}</td>
+                    <th className="text-capitalize">{edge.node.type.name}</th>
+                    <td><PropertyValue value={edge.node.value}
+                                       type={edge.node.type.valueType} /></td>
                 </tr>
             ))}
             </tbody>

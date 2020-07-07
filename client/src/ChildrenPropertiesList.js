@@ -3,6 +3,7 @@ import React from "react";
 import {useParams} from "react-router-dom";
 import Error from "./Error";
 import ObjectLink from "./ObjectLink";
+import PropertyValue from "./PropertyValue";
 
 export default function ChildrenPropertiesList(props) {
     const {childGroup} = props;
@@ -45,10 +46,13 @@ export default function ChildrenPropertiesList(props) {
                             {object.name}
                             </ObjectLink>
                         </td>
-                        {object.properties.edges.map((edge) => {
+                        {object.properties.edges.map((edge, index) => {
                             const property = edge.node
                             return(
-                                <td key={property.id}>{property.value}</td>
+                                <td key={property.id}>
+                                    <PropertyValue value={property.value}
+                                                   type={propertyTypes[index].valueType} />
+                                </td>
                             );
                         })}
                     </tr>
