@@ -22,8 +22,8 @@ var TAgent = &data.ObjectType{
 	PluralName:  "agents",
 	Description: "DC/OS cluster worker agent",
 	PropertyTypes: []*data.PropertyType{
-		PId,
 		PAgentType,
+		PId,
 		PAgentHostname,
 	},
 	ChildTypes: []*data.ObjectType{
@@ -38,6 +38,7 @@ var TFramework = &data.ObjectType{
 	Description: "Mesos framework",
 	PropertyTypes: []*data.PropertyType{
 		PId,
+		PFrameworkActive,
 	},
 	ChildTypes: []*data.ObjectType{
 		TTask,
@@ -83,6 +84,12 @@ var PAgentHostname = &data.PropertyType{
 	Name:        "hostname",
 	ValueType:   data.PVTString,
 	Description: "DC/OS agent hostname",
+}
+
+var PFrameworkActive = &data.PropertyType{
+	Name:        "active",
+	ValueType:   data.PVTBool,
+	Description: "Shows if the framework is active",
 }
 
 var PFramework = &data.PropertyType{

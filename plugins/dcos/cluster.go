@@ -55,6 +55,8 @@ func (c *cluster) ChildGroup(childTypeName data.ObjectTypeName) data.ObjectGroup
 	switch childTypeName {
 	case TAgent.Name:
 		return newAgentGroup(c.b)
+	case TFramework.Name:
+		return newFrameworkGroup(c.b)
 	}
 	return nil
 }
